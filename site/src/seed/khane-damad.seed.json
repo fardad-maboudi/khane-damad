@@ -1,0 +1,238 @@
+{
+  "$comment": "Seed pack for the Khaneh Damaad showcase. Applied through the live bookings routes by scripts/seed.ts (and by the in-site setup page), never written into the bundle as rows. Prices are in toman (currency IRT).",
+  "id": "khane-damad-barbershop",
+  "settings": {
+    "businessName": "خانه داماد",
+    "timezone": "Asia/Tehran",
+    "weekStartsOn": 6,
+    "leadTimeMinutes": 120,
+    "horizonDays": 21,
+    "slotIntervalMinutes": 30,
+    "cancellationWindowHours": 12,
+    "rescheduleWindowHours": 12,
+    "allowGuestBooking": true,
+    "requirePhone": true,
+    "autoConfirm": false,
+    "maxActivePerClient": 3,
+    "reminderOffsetsMinutes": [
+      -1440,
+      -120
+    ],
+    "cancellationPolicyText": "لغو یا جابه‌جایی نوبت تا ۱۲ ساعت قبل از موعد رایگان است. برای پکیج‌های داماد لطفاً حداقل ۴۸ ساعت قبل اطلاع دهید.",
+    "workingHoursNote": "شنبه تا پنج‌شنبه ۱۰:۰۰ تا ۲۱:۰۰، جمعه‌ها با هماهنگی قبلی"
+  },
+  "resources": [
+    {
+      "key": "mehdi",
+      "name": "مهدی حسینی‌نژاد",
+      "kind": "staff",
+      "title": "سرپرست استودیو و استاد کات",
+      "bio": "بیش از پانزده سال سابقه در کات مردانه و فید. مهدی بنیان‌گذار خانه داماد است و باور دارد یک کات خوب باید با فرم صورت و سبک زندگی شما بخواند، نه با مد روز. مشاور اصلی پکیج‌های داماد.",
+      "avatar": "https://images.pexels.com/photos/5188606/pexels-photo-5188606.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "color": "#1f4d3a",
+      "sortOrder": 1
+    },
+    {
+      "key": "amirhossein",
+      "name": "امیرحسین رحیمی",
+      "kind": "staff",
+      "title": "استاد ریش و تیغ",
+      "bio": "متخصص فرم‌دهی ریش و اصلاح سنتی با تیغ و حوله گرم. دقت و آرامش امیرحسین باعث شده بسیاری از مشتری‌های ثابت فقط پیش او نوبت بگیرند.",
+      "avatar": "https://images.pexels.com/photos/18483772/pexels-photo-18483772.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "color": "#b08d57",
+      "sortOrder": 2
+    },
+    {
+      "key": "parsa",
+      "name": "پارسا کریمی",
+      "kind": "staff",
+      "title": "متخصص رنگ و استایل مدرن",
+      "bio": "علاقه‌مند به کات‌های امروزی، رنگ و دکلره طبیعی مردانه و حالت‌دهی مجلسی. پارسا همیشه قبل از شروع، چند مدل مناسب موی شما را نشان می‌دهد.",
+      "avatar": "https://images.pexels.com/photos/2174113/pexels-photo-2174113.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "color": "#34363a",
+      "sortOrder": 3
+    }
+  ],
+  "services": [
+    {
+      "key": "haircut",
+      "name": "کات مو",
+      "group": "کات و استایل",
+      "description": "مشاوره فرم صورت، شستشو، کات با قیچی و ماشین و حالت‌دهی نهایی.",
+      "durationMinutes": 60,
+      "price": 450000,
+      "image": "https://images.pexels.com/photos/9992818/pexels-photo-9992818.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "amirhossein",
+        "parsa"
+      ],
+      "sortOrder": 1,
+      "package": {
+        "enabled": true,
+        "name": "بسته ۵ جلسه‌ای کات مو",
+        "sessionCount": 5,
+        "price": 1800000,
+        "validityDays": 120,
+        "schedulingMode": "self_schedule"
+      }
+    },
+    {
+      "key": "fade",
+      "name": "فید و کات تخصصی",
+      "group": "کات و استایل",
+      "description": "فید دقیق با درجه‌بندی تدریجی، خط‌گیری تمیز و فینیش مرتب. مناسب موهای کوتاه و مدرن.",
+      "durationMinutes": 60,
+      "price": 650000,
+      "image": "https://images.pexels.com/photos/33448215/pexels-photo-33448215.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "parsa"
+      ],
+      "sortOrder": 2
+    },
+    {
+      "key": "beard",
+      "name": "اصلاح و فرم‌دهی ریش",
+      "group": "ریش و صورت",
+      "description": "طراحی خط ریش، کوتاه‌کردن یکدست و مراقبت با روغن مخصوص.",
+      "durationMinutes": 30,
+      "price": 250000,
+      "image": "https://images.pexels.com/photos/3998419/pexels-photo-3998419.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "amirhossein",
+        "mehdi"
+      ],
+      "sortOrder": 3,
+      "package": {
+        "enabled": true,
+        "name": "بسته ۴ جلسه‌ای فرم ریش",
+        "sessionCount": 4,
+        "price": 800000,
+        "validityDays": 90,
+        "schedulingMode": "self_schedule"
+      }
+    },
+    {
+      "key": "razor-shave",
+      "name": "اصلاح سنتی با تیغ و حوله گرم",
+      "group": "ریش و صورت",
+      "description": "اصلاح کامل صورت با تیغ، حوله گرم و بخور، همراه با لوسیون ضدالتهاب.",
+      "durationMinutes": 30,
+      "price": 300000,
+      "image": "https://images.pexels.com/photos/5469884/pexels-photo-5469884.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "amirhossein"
+      ],
+      "sortOrder": 4
+    },
+    {
+      "key": "hair-beard",
+      "name": "پکیج کات مو و ریش",
+      "group": "کات و استایل",
+      "description": "کات کامل مو به‌همراه فرم‌دهی ریش در یک نوبت، با تخفیف نسبت به رزرو جداگانه.",
+      "durationMinutes": 90,
+      "price": 650000,
+      "image": "https://images.pexels.com/photos/32351047/pexels-photo-32351047.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "amirhossein"
+      ],
+      "sortOrder": 5
+    },
+    {
+      "key": "skin-care",
+      "name": "پاکسازی و مراقبت پوست مردانه",
+      "group": "مراقبت پوست",
+      "description": "پاکسازی عمیق، لایه‌برداری ملایم، ماسک و مرطوب‌کننده متناسب با نوع پوست.",
+      "durationMinutes": 60,
+      "price": 400000,
+      "image": "https://images.pexels.com/photos/18298041/pexels-photo-18298041.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "amirhossein",
+        "parsa"
+      ],
+      "sortOrder": 6
+    },
+    {
+      "key": "color",
+      "name": "رنگ و دکلره مردانه",
+      "group": "کات و استایل",
+      "description": "رنگ طبیعی یا پوشش موی سفید با محصولات کم‌بو؛ شامل مشاوره سایه و ترمیم.",
+      "durationMinutes": 90,
+      "price": 1200000,
+      "image": "https://images.pexels.com/photos/5509059/pexels-photo-5509059.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "parsa"
+      ],
+      "sortOrder": 7
+    },
+    {
+      "key": "styling",
+      "name": "حالت‌دهی و استایل مجلسی",
+      "group": "کات و استایل",
+      "description": "شستشو، سشوار و حالت‌دهی برای مهمانی، عکاسی یا مراسم رسمی.",
+      "durationMinutes": 30,
+      "price": 200000,
+      "image": "https://images.pexels.com/photos/4422102/pexels-photo-4422102.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "parsa"
+      ],
+      "sortOrder": 8
+    },
+    {
+      "key": "groom-classic",
+      "name": "پکیج داماد کلاسیک",
+      "group": "پکیج داماد",
+      "description": "کات مو، فرم‌دهی ریش و پاکسازی پوست در یک نوبت آرام، برای هفته پیش از مراسم.",
+      "durationMinutes": 120,
+      "price": 2800000,
+      "image": "https://images.pexels.com/photos/14049871/pexels-photo-14049871.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "amirhossein"
+      ],
+      "sortOrder": 9
+    },
+    {
+      "key": "groom-gold",
+      "name": "پکیج داماد طلایی",
+      "group": "پکیج داماد",
+      "description": "کات، اصلاح با تیغ و حوله گرم، فرم ریش، پاکسازی عمیق پوست، ماساژ سر و حالت‌دهی نهایی. با مشاوره قبل از روز مراسم.",
+      "durationMinutes": 150,
+      "price": 4500000,
+      "image": "https://images.pexels.com/photos/31619528/pexels-photo-31619528.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "resources": [
+        "mehdi",
+        "amirhossein"
+      ],
+      "sortOrder": 10
+    }
+  ],
+  "schedule": {
+    "weekdays": [
+      6,
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "startTime": "10:00",
+    "endTime": "21:00",
+    "slotIntervalMinutes": 30
+  },
+  "timeoff": [
+    {
+      "resource": "parsa",
+      "kind": "vacation",
+      "reason": "مرخصی",
+      "daysFromToday": 3,
+      "allDay": true
+    }
+  ],
+  "slotGeneration": {
+    "daysAhead": 21
+  }
+}
