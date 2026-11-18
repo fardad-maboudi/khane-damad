@@ -1,5 +1,5 @@
 /* Khaneh Damaad — identity: warm ivory, deep forest green, charcoal, restrained brass. */
-@theme {
+:root {
   /* brand ramp = forest green (drives shadcn primary / focus ring) */
   --color-brand-50: #eef3ef;
   --color-brand-100: #d6e3da;
