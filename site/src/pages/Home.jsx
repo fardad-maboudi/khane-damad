@@ -144,7 +144,9 @@ function WorkSection() {
           {picks.map((item, index) => (
             <li key={item.id} className={index === 0 || index === 3 ? "lg:row-span-1" : ""}>
               <Reveal delay={(index % 3) * 80}>
-                <Link to={`/portfolio?photo=${item.id}`} className="block"><PortfolioTile item={item} /></Link>
+                <Link to={`/portfolio?photo=${item.id}`} className="group block rounded-2xl" aria-label={`مشاهده تصویر: ${item.title}`}>
+                  <PortfolioTile item={item} />
+                </Link>
               </Reveal>
             </li>
           ))}

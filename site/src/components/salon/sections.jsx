@@ -174,13 +174,29 @@ export function LocationSection({ heading = true }) {
 /* ---------------- Portfolio grid ---------------- */
 
 export function PortfolioTile({ item, onOpen, className }) {
-  return (
-    <button type="button" onClick={() => onOpen?.(item)} className={cn("img-zoom group relative block w-full overflow-hidden rounded-2xl text-start", className)} aria-label={`مشاهده تصویر: ${item.title}`}>
+  const content = (
+    <>
       <Photo id={item.id} alt={item.alt} ratio={`${item.width} / ${item.height}`} sizes="(min-width: 1024px) 25vw, 45vw" />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-900/80 to-transparent p-4 pt-12 text-sm font-semibold text-ivory-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
         {item.title}
       </span>
-    </button>
+    </>
+  );
+
+  const sharedClasses = cn("img-zoom group relative block w-full overflow-hidden rounded-2xl text-start", className);
+
+  if (onOpen) {
+    return (
+      <button type="button" onClick={() => onOpen(item)} className={sharedClasses} aria-label={`مشاهده تصویر: ${item.title}`}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={sharedClasses} aria-hidden="true">
+      {content}
+    </div>
   );
 }
 
@@ -188,7 +204,7 @@ export function PortfolioTile({ item, onOpen, className }) {
 
 export function FinalCta({ title = "نوبت بعدی‌ات را همین حالا بگیر", text = "خدمت و آرایشگر دلخواه را انتخاب کن؛ فقط ساعت‌های واقعاً خالی نمایش داده می‌شود." }) {
   return (
-    <section aria-labelledby="final-cta" className="pt-4">
+    <section aria-labelledby="final-cta">
       <Container>
         <Reveal className="relative overflow-hidden rounded-[1.75rem] bg-forest-800 px-6 py-14 text-center text-ivory-50 sm:px-12 sm:py-20">
           <div aria-hidden className="absolute inset-0 opacity-25" style={{ backgroundImage: `url(${pexelsUrl(30547746, 800)})`, backgroundSize: "cover", backgroundPosition: "center", mixBlendMode: "luminosity" }} />

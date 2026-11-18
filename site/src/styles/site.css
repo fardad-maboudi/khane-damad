@@ -60,12 +60,18 @@
   --radius-button: 999px;
   --radius-lg: 14px;
   --radius-xl: 20px;
-  --space-section: 5.5rem;
+  --space-section: 3.5rem;
   --shadow-md: 0 12px 32px rgb(23 24 26 / 0.1);
 
   --font-heading: var(--font-estedad);
   --font-body: var(--font-vazirmatn);
   --font-display: "Aref Ruqaa", "Estedad", system-ui, serif;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --space-section: 5.5rem;
+  }
 }
 
 @font-face {
@@ -113,7 +119,6 @@ p {
 :focus-visible {
   outline: 3px solid var(--color-brass-500);
   outline-offset: 3px;
-  border-radius: 6px;
 }
 
 /* Horizontal chip strips scroll without a chunky bar */

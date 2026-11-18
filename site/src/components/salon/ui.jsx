@@ -72,7 +72,7 @@ export function Photo({ id, src, alt, ratio = "4 / 5", sizes = "(min-width: 1024
 
 const BTN_BASE =
   "btn-press inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none disabled:cursor-not-allowed disabled:opacity-50";
-const BTN_SIZE = { md: "h-12 px-7 text-[0.95rem]", lg: "h-14 px-9 text-base", sm: "h-10 px-5 text-sm" };
+const BTN_SIZE = { md: "h-12 px-7 text-[0.95rem]", lg: "h-14 px-9 text-base", sm: "h-11 px-5 text-sm" };
 const BTN_VARIANT = {
   primary: "btn-fill bg-forest-700 text-ivory-50 hover:text-charcoal-900 shadow-[0_8px_20px_-8px_rgb(15_32_25/0.6)]",
   brass: "bg-brass-500 text-charcoal-900 hover:bg-brass-400",
