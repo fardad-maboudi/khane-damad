@@ -48,7 +48,7 @@ function MobileMenu({ open, onClose }) {
     <div id="mobile-menu" ref={panelRef} role="dialog" aria-modal="true" aria-label="منوی اصلی" className="fixed inset-0 z-50 flex flex-col bg-forest-900 text-ivory-50 lg:hidden page-enter">
       <div className="flex h-[4.5rem] items-center justify-between px-5">
         <Wordmark tone="light" />
-        <button type="button" onClick={onClose} aria-label="بستن منو" className="grid size-11 place-items-center rounded-full border border-ivory-50/25">
+        <button type="button" onClick={onClose} aria-label="بستن منو" className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/25">
           <X className="size-5" aria-hidden />
         </button>
       </div>

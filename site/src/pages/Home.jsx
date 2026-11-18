@@ -28,7 +28,7 @@ function Hero({ counts }) {
       <Container className="relative grid items-center gap-12 pb-20 pt-10 sm:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:pb-28 lg:pt-16">
         <div>
           <p className="hero-rise text-sm font-semibold text-brass-700" style={{ "--i": 0 }}>{hero.eyebrow}</p>
-          <h1 id="hero-title" className="mt-5 text-[2.9rem] font-extrabold leading-[1.22] text-forest-900 sm:text-6xl lg:text-[4.6rem]">
+          <h1 id="hero-title" className="mt-5 text-[2.35rem] font-extrabold leading-[1.22] text-forest-900 sm:text-5xl lg:text-[4.6rem]">
             {words.map((word, i) => (
               <Fragment key={word + i}>
               <span className="hero-rise inline-block" style={{ "--i": i + 1 }}>
@@ -115,7 +115,7 @@ function OfferSection({ services }) {
     <section aria-labelledby="offer-title">
       <Container>
         <Reveal className="grid overflow-hidden rounded-[1.75rem] bg-forest-900 text-ivory-50 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="p-8 sm:p-12">
+          <div className="p-6 sm:p-10 lg:p-12">
             <p className="inline-flex items-center gap-2 rounded-full border border-brass-400/50 px-3 py-1 text-xs font-semibold text-brass-300"><Sparkles className="size-3.5" aria-hidden /> {offer.badge}</p>
             <h2 id="offer-title" className="mt-5 text-3xl font-bold leading-[1.4] sm:text-4xl">{offer.title}</h2>
             <p className="mt-4 max-w-lg text-ivory-200 leading-8">{offer.text}</p>
