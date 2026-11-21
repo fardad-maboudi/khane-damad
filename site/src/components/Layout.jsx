@@ -125,7 +125,7 @@ function Header() {
             aria-label="باز کردن منو"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            className="grid size-11 place-items-center rounded-full border border-forest-700/25 text-forest-800 lg:hidden"
+            className="btn-press grid size-11 place-items-center rounded-full border border-forest-700/25 text-forest-800 lg:hidden"
           >
             <Menu className="size-5" aria-hidden />
           </button>
