@@ -28,7 +28,7 @@ function Hero({ counts }) {
       <Container className="relative grid items-center gap-12 pb-20 pt-10 sm:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:pb-28 lg:pt-16">
         <div>
           <p className="hero-rise text-sm font-semibold text-brass-700" style={{ "--i": 0 }}>{hero.eyebrow}</p>
-          <h1 id="hero-title" className="mt-5 text-[2.9rem] font-extrabold leading-[1.22] text-forest-900 sm:text-6xl lg:text-[4.6rem]">
+          <h1 id="hero-title" className="mt-4 text-[2.35rem] font-extrabold leading-[1.22] text-forest-900 sm:text-5xl lg:text-[4.6rem]">
             {words.map((word, i) => (
               <Fragment key={word + i}>
               <span className="hero-rise inline-block" style={{ "--i": i + 1 }}>
@@ -45,12 +45,12 @@ function Hero({ counts }) {
               </Fragment>
             ))}
           </h1>
-          <p className="hero-rise mt-7 max-w-xl text-lg leading-9 text-neutral-700" style={{ "--i": 5 }}>{hero.lead}</p>
-          <div className="hero-rise mt-9 flex flex-col gap-3 sm:flex-row" style={{ "--i": 6 }}>
+          <p className="hero-rise mt-6 max-w-xl text-lg leading-9 text-neutral-700" style={{ "--i": 5 }}>{hero.lead}</p>
+          <div className="hero-rise mt-8 flex flex-col gap-3 sm:flex-row" style={{ "--i": 6 }}>
             <Btn to="/book" size="lg">رزرو نوبت <ArrowLeft className="size-5" aria-hidden /></Btn>
             <Btn to="/services" variant="outline" size="lg">خدمات و تعرفه</Btn>
           </div>
-          <ul className="hero-rise mt-9 flex flex-wrap gap-x-7 gap-y-2.5 text-sm text-neutral-800" style={{ "--i": 7 }}>
+          <ul className="hero-rise mt-8 flex flex-wrap gap-x-7 gap-y-2.5 text-sm text-neutral-800" style={{ "--i": 7 }}>
             {hero.points.map((point) => (
               <li key={point} className="flex items-center gap-2">
                 <Check className="size-4 text-brass-600" aria-hidden />
@@ -60,7 +60,7 @@ function Hero({ counts }) {
           </ul>
         </div>
         <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-          <div aria-hidden className="absolute inset-0 translate-x-4 translate-y-4 rounded-t-[999px] rounded-b-[2rem] border border-brass-500/70 sm:translate-x-6 sm:translate-y-6" />
+          <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-t-[999px] rounded-b-[2rem] border border-brass-500/70 sm:translate-x-6 sm:translate-y-6" />
           <div className="hero-arch relative overflow-hidden rounded-t-[999px] rounded-b-[2rem] shadow-[0_30px_60px_-30px_rgb(15_32_25/0.55)]">
             <Photo id={hero.image.id} alt={hero.image.alt} ratio="4 / 5" priority sizes="(min-width: 1024px) 42vw, 90vw" className="hero-photo" />
             <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-forest-900/35 via-transparent to-transparent" />
@@ -91,7 +91,7 @@ function ServicesSection({ catalog }) {
             همه خدمات و تعرفه <ArrowLeft className="size-4" aria-hidden />
           </Link>
         </div>
-        <div className="mt-12 grid gap-5 lg:grid-cols-[1.25fr_1fr_1fr] lg:grid-rows-2">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr_1fr] lg:grid-rows-2">
           {isLoading ? [0, 1, 2, 3].map((n) => <ServiceCardSkeleton key={n} />) : null}
           {isError ? (
             <div className="col-span-full"><p role="alert" className="rounded-2xl border border-[#8a2a22]/30 bg-[#fbeeea] p-6 text-[#5c1b16]">دریافت خدمات ممکن نشد. <button type="button" className="font-bold underline" onClick={() => refetch()}>تلاش دوباره</button></p></div>
@@ -115,7 +115,7 @@ function OfferSection({ services }) {
     <section aria-labelledby="offer-title">
       <Container>
         <Reveal className="grid overflow-hidden rounded-[1.75rem] bg-forest-900 text-ivory-50 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="p-8 sm:p-12">
+          <div className="p-6 sm:p-10 lg:p-12">
             <p className="inline-flex items-center gap-2 rounded-full border border-brass-400/50 px-3 py-1 text-xs font-semibold text-brass-300"><Sparkles className="size-3.5" aria-hidden /> {offer.badge}</p>
             <h2 id="offer-title" className="mt-5 text-3xl font-bold leading-[1.4] sm:text-4xl">{offer.title}</h2>
             <p className="mt-4 max-w-lg text-ivory-200 leading-8">{offer.text}</p>
@@ -140,11 +140,13 @@ function WorkSection() {
             مشاهده همه نمونه‌کارها <ArrowLeft className="size-4" aria-hidden />
           </Link>
         </div>
-        <ul className="mt-10 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+        <ul className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
           {picks.map((item, index) => (
             <li key={item.id} className={index === 0 || index === 3 ? "lg:row-span-1" : ""}>
               <Reveal delay={(index % 3) * 80}>
-                <Link to={`/portfolio?photo=${item.id}`} className="block"><PortfolioTile item={item} /></Link>
+                <Link to={`/portfolio?photo=${item.id}`} className="group block rounded-2xl" aria-label={`مشاهده تصویر: ${item.title}`}>
+                  <PortfolioTile item={item} />
+                </Link>
               </Reveal>
             </li>
           ))}
@@ -166,7 +168,7 @@ function ReviewsSection() {
             <div><Stars value={rating} size={18} /><p className="mt-1 text-sm text-neutral-600">میانگین {toFa(reviews.items.length)} نظر نمونه</p></div>
           </div>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {reviews.items.slice(0, 3).map((review, index) => (
             <Reveal key={review.name + review.date} delay={index * 90}><ReviewCard review={review} /></Reveal>
           ))}
@@ -192,7 +194,7 @@ function TeamSection({ catalog }) {
             آشنایی با تیم <ArrowLeft className="size-4" aria-hidden />
           </Link>
         </div>
-        <div className="mt-10 grid gap-5 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {data.barbers.map((barber, index) => (
             <Reveal key={barber.id} delay={index * 90}><BarberCard barber={barber} services={data.services} /></Reveal>
           ))}

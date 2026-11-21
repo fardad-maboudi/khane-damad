@@ -9,7 +9,7 @@ import { directionLinks, specialtiesOf } from "@/lib/salon-helpers.js";
 
 export function ServiceCard({ service, className, large = false, wide = false }) {
   return (
-    <article className={cn("group flex overflow-hidden rounded-2xl border border-ivory-300 bg-ivory-50 transition-[box-shadow,transform] duration-500 hover:-translate-y-1 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.45)]", wide ? "flex-col sm:flex-row" : "flex-col", className)}>
+    <article className={cn("group flex overflow-hidden rounded-2xl border border-ivory-300 bg-ivory-50 transition-[box-shadow,transform] duration-250 ease-out hover:-translate-y-1 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.45)]", wide ? "flex-col sm:flex-row" : "flex-col", className)}>
       <div className={cn("img-zoom", wide && "sm:w-2/5 sm:shrink-0", large && "lg:flex lg:min-h-[22rem] lg:flex-1 lg:flex-col")}>
         <Photo src={service.image} alt={`${service.name} در خانه داماد`} ratio="16 / 10" sizes="(min-width: 1024px) 30vw, 90vw" className={cn(wide && "sm:!aspect-auto sm:h-full sm:min-h-[12rem]", large && "lg:!aspect-auto lg:h-full lg:flex-1")} />
       </div>
@@ -174,13 +174,29 @@ export function LocationSection({ heading = true }) {
 /* ---------------- Portfolio grid ---------------- */
 
 export function PortfolioTile({ item, onOpen, className }) {
-  return (
-    <button type="button" onClick={() => onOpen?.(item)} className={cn("img-zoom group relative block w-full overflow-hidden rounded-2xl text-start", className)} aria-label={`مشاهده تصویر: ${item.title}`}>
+  const content = (
+    <>
       <Photo id={item.id} alt={item.alt} ratio={`${item.width} / ${item.height}`} sizes="(min-width: 1024px) 25vw, 45vw" />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-charcoal-900/80 to-transparent p-4 pt-12 text-sm font-semibold text-ivory-50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100">
         {item.title}
       </span>
-    </button>
+    </>
+  );
+
+  const sharedClasses = cn("img-zoom group relative block w-full overflow-hidden rounded-2xl text-start", className);
+
+  if (onOpen) {
+    return (
+      <button type="button" onClick={() => onOpen(item)} className={sharedClasses} aria-label={`مشاهده تصویر: ${item.title}`}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={sharedClasses} aria-hidden="true">
+      {content}
+    </div>
   );
 }
 
@@ -188,7 +204,7 @@ export function PortfolioTile({ item, onOpen, className }) {
 
 export function FinalCta({ title = "نوبت بعدی‌ات را همین حالا بگیر", text = "خدمت و آرایشگر دلخواه را انتخاب کن؛ فقط ساعت‌های واقعاً خالی نمایش داده می‌شود." }) {
   return (
-    <section aria-labelledby="final-cta" className="pt-4">
+    <section aria-labelledby="final-cta">
       <Container>
         <Reveal className="relative overflow-hidden rounded-[1.75rem] bg-forest-800 px-6 py-14 text-center text-ivory-50 sm:px-12 sm:py-20">
           <div aria-hidden className="absolute inset-0 opacity-25" style={{ backgroundImage: `url(${pexelsUrl(30547746, 800)})`, backgroundSize: "cover", backgroundPosition: "center", mixBlendMode: "luminosity" }} />
@@ -240,13 +256,13 @@ export function LoyaltyBand() {
   return (
     <section aria-labelledby="loyalty-title" className="py-[var(--space-section)]">
       <Container>
-        <Reveal className="grid items-center gap-10 rounded-[1.75rem] border border-brass-400/60 bg-ivory-50 p-8 sm:p-12 lg:grid-cols-[1fr_1.1fr]">
+        <Reveal className="grid items-center gap-8 rounded-[1.75rem] border border-brass-400/60 bg-ivory-50 p-5 sm:p-8 lg:grid-cols-[1fr_1.1fr] lg:p-12">
           <div>
             <h2 id="loyalty-title" className="text-3xl font-bold leading-[1.4] text-forest-900 sm:text-4xl">{loyalty.title}</h2>
             <p className="mt-4 max-w-lg leading-8 text-neutral-700">{loyalty.text}</p>
             <Btn to="/book" className="mt-7">اولین مهر را بگیر <ArrowLeft className="size-5" aria-hidden /></Btn>
           </div>
-          <ol aria-label="مراحل کارت وفاداری" className="grid grid-cols-5 gap-3 sm:gap-4">
+          <ol aria-label="مراحل کارت وفاداری" className="grid grid-cols-5 gap-2 sm:gap-4">
             {Array.from({ length: loyalty.every }, (_, i) => {
               const last = i === loyalty.every - 1;
               return (

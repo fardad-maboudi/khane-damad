@@ -48,7 +48,7 @@ function MobileMenu({ open, onClose }) {
     <div id="mobile-menu" ref={panelRef} role="dialog" aria-modal="true" aria-label="منوی اصلی" className="fixed inset-0 z-50 flex flex-col bg-forest-900 text-ivory-50 lg:hidden page-enter">
       <div className="flex h-[4.5rem] items-center justify-between px-5">
         <Wordmark tone="light" />
-        <button type="button" onClick={onClose} aria-label="بستن منو" className="grid size-11 place-items-center rounded-full border border-ivory-50/25">
+        <button type="button" onClick={onClose} aria-label="بستن منو" className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/25">
           <X className="size-5" aria-hidden />
         </button>
       </div>
@@ -125,7 +125,7 @@ function Header() {
             aria-label="باز کردن منو"
             aria-expanded={open}
             aria-controls="mobile-menu"
-            className="grid size-11 place-items-center rounded-full border border-forest-700/25 text-forest-800 lg:hidden"
+            className="btn-press grid size-11 place-items-center rounded-full border border-forest-700/25 text-forest-800 lg:hidden"
           >
             <Menu className="size-5" aria-hidden />
           </button>
@@ -138,7 +138,7 @@ function Header() {
 
 function Footer() {
   return (
-    <footer className="mt-24 bg-forest-900 text-ivory-200">
+    <footer className="mt-[var(--space-section)] bg-forest-900 pb-24 text-ivory-200 lg:pb-0">
       <Container className="grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Wordmark tone="light" />
@@ -173,9 +173,9 @@ function Footer() {
             <li><a href={`tel:${contact.mobile}`} className="flex items-center gap-2 hover:text-brass-300"><Phone className="size-4 text-brass-400" aria-hidden /> <span dir="ltr" className="num">{contact.mobileDisplay}</span></a></li>
           </ul>
           <div className="mt-5 flex items-center gap-3">
-            {contact.instagram ? <a href={`https://instagram.com/${contact.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام خانه داماد" className="grid size-10 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><InstagramIcon /></a> : null}
-            {contact.telegram ? <a href={`https://t.me/${contact.telegram}`} target="_blank" rel="noopener noreferrer" aria-label="تلگرام خانه داماد" className="grid size-10 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><TelegramIcon /></a> : null}
-            {contact.whatsapp ? <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتس‌اپ خانه داماد" className="grid size-10 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><WhatsappIcon /></a> : null}
+            {contact.instagram ? <a href={`https://instagram.com/${contact.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="اینستاگرام خانه داماد" className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><InstagramIcon /></a> : null}
+            {contact.telegram ? <a href={`https://t.me/${contact.telegram}`} target="_blank" rel="noopener noreferrer" aria-label="تلگرام خانه داماد" className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><TelegramIcon /></a> : null}
+            {contact.whatsapp ? <a href={`https://wa.me/${contact.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="واتس‌اپ خانه داماد" className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/20 hover:border-brass-300 hover:text-brass-300"><WhatsappIcon /></a> : null}
           </div>
         </div>
       </Container>
@@ -220,7 +220,7 @@ export default function Layout({ children }) {
     <div className="flex min-h-screen flex-col bg-ivory-100 text-charcoal-900">
       <a href="#main" className="skip-link">پرش به محتوای اصلی</a>
       <Header />
-      <main id="main" key={pathname} tabIndex={-1} className="page-enter flex-1 pb-24 outline-none lg:pb-0">
+      <main id="main" key={pathname} tabIndex={-1} className="page-enter flex-1 outline-none">
         {children}
       </main>
       <Footer />
