@@ -20,12 +20,45 @@ import { brand, contact, hero, offer, portfolio, reviews } from "@/content/salon
 import { toFa } from "@/lib/fa.js";
 import { groupServices, useCatalog } from "@/lib/salon-api.js";
 
+/* ---------------- Vertical rhythm ----------------
+ * One --space-section gap per section, applied on the top edge only, so two
+ * neighbouring sections can never double the gap. Tinted full-bleed bands keep
+ * symmetric padding (the tint needs air on both sides) and the section right
+ * after a band drops its top gap because the band's bottom padding already
+ * provides it.
+ */
+const SECTION = "pt-[var(--space-section)]";
+const BAND = "py-[var(--space-section)]";
+/** Heading row → content, identical in every section. */
+const SECTION_BODY = "mt-10 sm:mt-12";
+/** Heading + trailing “see all” link, identical in every section. */
+const SECTION_HEAD = "flex flex-col justify-between gap-6 sm:flex-row sm:items-end sm:gap-10";
+const SEE_ALL =
+  "inline-flex shrink-0 items-center gap-2 font-semibold text-forest-800 underline decoration-brass-500 decoration-2 underline-offset-8 hover:text-forest-900";
+
+function SeeAll({ to, children }) {
+  return (
+    <Link to={to} className={SEE_ALL}>
+      {children} <ArrowLeft className="size-4" aria-hidden />
+    </Link>
+  );
+}
+
+/**
+ * Shared sections (LoyaltyBand, LocationSection, FinalCta) ship with their own
+ * padding; this wrapper supplies the page rhythm and flattens their padding so
+ * the gap is counted once.
+ */
+function Band({ children }) {
+  return <div className={`${SECTION} [&>section]:py-0`}>{children}</div>;
+}
+
 function Hero({ counts }) {
   const words = hero.title.split(" ");
   return (
     <section className="relative overflow-hidden" aria-labelledby="hero-title">
       <div aria-hidden className="pointer-events-none absolute -start-40 top-10 size-[34rem] rounded-full bg-brass-200/40 blur-3xl" />
-      <Container className="relative grid items-center gap-12 pb-20 pt-10 sm:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:pb-28 lg:pt-16">
+      <Container className="relative grid items-center gap-12 pt-10 sm:pt-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20 lg:pt-16">
         <div>
           <p className="hero-rise text-sm font-semibold text-brass-700" style={{ "--i": 0 }}>{hero.eyebrow}</p>
           <h1 id="hero-title" className="mt-4 text-[2.35rem] font-extrabold leading-[1.22] text-forest-900 sm:text-5xl lg:text-[4.6rem]">
@@ -59,7 +92,8 @@ function Hero({ counts }) {
             ))}
           </ul>
         </div>
-        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+        {/* mb-8 leaves room for the rating chip that hangs below the arch. */}
+        <div className="relative mx-auto mb-8 w-full max-w-md lg:max-w-none">
           <div aria-hidden className="absolute inset-0 translate-x-2 translate-y-2 rounded-t-[999px] rounded-b-[2rem] border border-brass-500/70 sm:translate-x-6 sm:translate-y-6" />
           <div className="hero-arch relative overflow-hidden rounded-t-[999px] rounded-b-[2rem] shadow-[0_30px_60px_-30px_rgb(15_32_25/0.55)]">
             <Photo id={hero.image.id} alt={hero.image.alt} ratio="4 / 5" priority sizes="(min-width: 1024px) 42vw, 90vw" className="hero-photo" />
@@ -83,22 +117,20 @@ function ServicesSection({ catalog }) {
   const featured = data ? groupServices(data.services).map((g) => g.items[0]).slice(0, 4) : [];
   const [lead, ...rest] = featured;
   return (
-    <section aria-labelledby="services-title" className="py-[var(--space-section)]">
+    <section aria-labelledby="services-title" className={SECTION}>
       <Container>
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div className={SECTION_HEAD}>
           <SectionHeading title={<span id="services-title">هر آنچه برای ظاهری مرتب لازم داری</span>} lead="از یک کات ساده تا پکیج کامل داماد؛ مدت و قیمت هر خدمت شفاف است." />
-          <Link to="/services" className="inline-flex items-center gap-2 font-semibold text-forest-800 underline decoration-brass-500 decoration-2 underline-offset-8 hover:text-forest-900">
-            همه خدمات و تعرفه <ArrowLeft className="size-4" aria-hidden />
-          </Link>
+          <SeeAll to="/services">همه خدمات و تعرفه</SeeAll>
         </div>
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr_1fr] lg:grid-rows-2">
+        <div className={`${SECTION_BODY} grid gap-6 lg:grid-cols-[1.25fr_1fr_1fr] lg:grid-rows-2`}>
           {isLoading ? [0, 1, 2, 3].map((n) => <ServiceCardSkeleton key={n} />) : null}
           {isError ? (
             <div className="col-span-full"><p role="alert" className="rounded-2xl border border-[#8a2a22]/30 bg-[#fbeeea] p-6 text-[#5c1b16]">دریافت خدمات ممکن نشد. <button type="button" className="font-bold underline" onClick={() => refetch()}>تلاش دوباره</button></p></div>
           ) : null}
           {lead ? <Reveal className="lg:row-span-2"><ServiceCard service={lead} className="h-full" large /></Reveal> : null}
           {rest.map((service, index) => (
-            <Reveal key={service.id} delay={(index + 1) * 90} className={index === 2 ? "lg:col-span-2" : ""}><ServiceCard service={service} className="h-full" wide={index === 2} /></Reveal>
+            <Reveal key={service.id} delay={(index + 1) * 90} className={index === 2 ? "lg:col-span-2" : undefined}><ServiceCard service={service} className="h-full" wide={index === 2} /></Reveal>
           ))}
           {data && !featured.length ? <div className="col-span-full"><CatalogEmpty /></div> : null}
         </div>
@@ -112,7 +144,7 @@ function OfferSection({ services }) {
   const target = services?.find((s) => s.name === offer.serviceName);
   const href = target ? `/book?service=${encodeURIComponent(target.id)}` : "/book";
   return (
-    <section aria-labelledby="offer-title">
+    <section aria-labelledby="offer-title" className={SECTION}>
       <Container>
         <Reveal className="grid overflow-hidden rounded-[1.75rem] bg-forest-900 text-ivory-50 md:grid-cols-[1.2fr_0.8fr]">
           <div className="p-6 sm:p-10 lg:p-12">
@@ -120,7 +152,7 @@ function OfferSection({ services }) {
             <h2 id="offer-title" className="mt-5 text-3xl font-bold leading-[1.4] sm:text-4xl">{offer.title}</h2>
             <p className="mt-4 max-w-lg text-ivory-200 leading-8">{offer.text}</p>
             <p className="mt-3 text-sm text-brass-300">{offer.until}</p>
-            <Btn to={href} variant="brass" size="lg" className="mt-7">{offer.cta} <ArrowLeft className="size-5" aria-hidden /></Btn>
+            <Btn to={href} variant="brass" size="lg" className="mt-8">{offer.cta} <ArrowLeft className="size-5" aria-hidden /></Btn>
           </div>
           <Photo id={offer.image.id} alt={offer.image.alt} ratio="4 / 3" sizes="(min-width: 768px) 35vw, 90vw" className="min-h-[16rem] md:!aspect-auto md:h-full" />
         </Reveal>
@@ -132,17 +164,15 @@ function OfferSection({ services }) {
 function WorkSection() {
   const picks = [portfolio[0], portfolio[3], portfolio[2], portfolio[7], portfolio[4], portfolio[5]];
   return (
-    <section aria-labelledby="work-title" className="py-[var(--space-section)]">
+    <section aria-labelledby="work-title" className={SECTION}>
       <Container>
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div className={SECTION_HEAD}>
           <SectionHeading title={<span id="work-title">نتیجه، بهتر از هر توضیحی حرف می‌زند</span>} lead="چند نمونه از کات، ریش و آماده‌سازی داماد در استودیو." />
-          <Link to="/portfolio" className="inline-flex items-center gap-2 font-semibold text-forest-800 underline decoration-brass-500 decoration-2 underline-offset-8 hover:text-forest-900">
-            مشاهده همه نمونه‌کارها <ArrowLeft className="size-4" aria-hidden />
-          </Link>
+          <SeeAll to="/portfolio">مشاهده همه نمونه‌کارها</SeeAll>
         </div>
-        <ul className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
+        <ul className={`${SECTION_BODY} grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3`}>
           {picks.map((item, index) => (
-            <li key={item.id} className={index === 0 || index === 3 ? "lg:row-span-1" : ""}>
+            <li key={item.id}>
               <Reveal delay={(index % 3) * 80}>
                 <Link to={`/portfolio?photo=${item.id}`} className="group block rounded-2xl" aria-label={`مشاهده تصویر: ${item.title}`}>
                   <PortfolioTile item={item} />
@@ -159,21 +189,21 @@ function WorkSection() {
 function ReviewsSection() {
   const rating = averageRating();
   return (
-    <section aria-labelledby="reviews-title" className="bg-ivory-50 py-[var(--space-section)]">
+    <section aria-labelledby="reviews-title" className={`bg-ivory-50 ${BAND}`}>
       <Container>
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div className={SECTION_HEAD}>
           <SectionHeading title={<span id="reviews-title">مشتری‌هایمان چه می‌گویند</span>} />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 sm:self-end">
             <p className="text-5xl font-extrabold text-forest-900 num">{toFa(rating.toFixed(1))}</p>
             <div><Stars value={rating} size={18} /><p className="mt-1 text-sm text-neutral-600">میانگین {toFa(reviews.items.length)} نظر نمونه</p></div>
           </div>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className={`${SECTION_BODY} grid gap-6 md:grid-cols-3`}>
           {reviews.items.slice(0, 3).map((review, index) => (
-            <Reveal key={review.name + review.date} delay={index * 90}><ReviewCard review={review} /></Reveal>
+            <Reveal key={review.name + review.date} delay={index * 90} className="h-full"><ReviewCard review={review} /></Reveal>
           ))}
         </div>
-        <div className="mt-8 flex flex-wrap items-center gap-3">
+        <div className="mt-8 flex flex-wrap items-center gap-3 sm:mt-10">
           <Btn to="/reviews" variant="outline">همه نظرات</Btn>
           <ReviewLink />
         </div>
@@ -186,17 +216,16 @@ function TeamSection({ catalog }) {
   const { data } = catalog;
   if (!data?.barbers.length) return null;
   return (
-    <section aria-labelledby="team-title" className="py-[var(--space-section)]">
+    // Follows the tinted reviews band, whose bottom padding already opens the gap.
+    <section aria-labelledby="team-title">
       <Container>
-        <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+        <div className={SECTION_HEAD}>
           <SectionHeading title={<span id="team-title">دست‌های حرفه‌ای پشت هر کات</span>} lead="هر آرایشگر تخصص مشخص و تقویم مستقل دارد؛ مستقیم با او نوبت بگیرید." />
-          <Link to="/about" className="inline-flex items-center gap-2 font-semibold text-forest-800 underline decoration-brass-500 decoration-2 underline-offset-8 hover:text-forest-900">
-            آشنایی با تیم <ArrowLeft className="size-4" aria-hidden />
-          </Link>
+          <SeeAll to="/about">آشنایی با تیم</SeeAll>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        <div className={`${SECTION_BODY} grid gap-6 md:grid-cols-3`}>
           {data.barbers.map((barber, index) => (
-            <Reveal key={barber.id} delay={index * 90}><BarberCard barber={barber} services={data.services} /></Reveal>
+            <Reveal key={barber.id} delay={index * 90} className="h-full"><BarberCard barber={barber} services={data.services} /></Reveal>
           ))}
         </div>
       </Container>
@@ -232,9 +261,9 @@ export default function Home() {
       <WorkSection />
       <ReviewsSection />
       <TeamSection catalog={catalog} />
-      <LoyaltyBand />
-      <LocationSection />
-      <FinalCta />
+      <Band><LoyaltyBand /></Band>
+      <Band><LocationSection /></Band>
+      <Band><FinalCta /></Band>
     </>
   );
 }
