@@ -43,6 +43,6 @@ export function reminderLinks(phone, text) {
   const intl = digits.startsWith("98") ? digits : `98${digits.replace(/^0/, "")}`;
   return {
     whatsapp: `https://wa.me/${intl}?text=${encodeURIComponent(text)}`,
-    sms: `sms:+${intl}?&body=${encodeURIComponent(text)}`,
+    sms: `sms:+${intl}?body=${encodeURIComponent(text)}`,
   };
 }

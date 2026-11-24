@@ -31,6 +31,7 @@ Tokens live in `site/src/styles/site.css`. **Always use the tokens; never hardco
 | **Antique Brass** (`brass`) | `#b08d57` (500), `#c2a064` (400), `#e6d4ac` (200) | Luxury accent, used **sparingly**: badges, rating stars, hover fills, scrollbar thumb, focus rings |
 | **Warm Ivory** (`ivory` / `surface`) | `#fcfaf5` (50), `#f7f2e7` (100), `#ede5d1` (200), `#ded3b9` (300) | Page canvas and surfaces (a linen/papyrus feel, like fine card stock) |
 | **Charcoal / Ink** (`charcoal` / `ink`) | `#17181a` (900), `#232528` (800), `#5b5a52` (muted) | Text and contrast |
+| **Crimson / Danger** (`danger`) | `#fbeeea` (50), `#f6dcd7` (100), `#8a2a22` (600), `#7a241c` (700), `#5c1b16` (900) | Validation alerts, destructive actions, and cancellation badges |
 
 **Usage rules**
 

@@ -1,5 +1,6 @@
 // Standalone stub for query hooks keys
 export const queryKeys = {
+  plugin: (name) => ["plugin", name],
   bookings: {
     all: ["bookings"],
     lists: () => ["bookings", "list"],

@@ -1,73 +1,190 @@
 import { createPortal } from "react-dom";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, ArrowLeft } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
-import { Btn, Container } from "@/components/salon/ui.jsx";
+import { Btn, Container, useDialogFocusTrap } from "@/components/salon/ui.jsx";
 import { FinalCta, PageHero, PortfolioTile } from "@/components/salon/sections.jsx";
 import { pexelsUrl, portfolio, portfolioCategories } from "@/content/salon.js";
+import { toFa } from "@/lib/fa.js";
 import { cn } from "@/lib/utils";
 
-function Viewer({ items, index, onClose, onIndex }) {
-  const item = items[index];
-  const closeRef = useRef(null);
-  const prev = useCallback(() => onIndex((index - 1 + items.length) % items.length), [index, items.length, onIndex]);
-  const next = useCallback(() => onIndex((index + 1) % items.length), [index, items.length, onIndex]);
+function Viewer({ items, activeId, onClose, onSelectId }) {
+  const dialogRef = useRef(null);
+  const index = Math.max(0, items.findIndex((p) => p.id === activeId));
+  const item = items[index] ?? items[0];
+
+  useDialogFocusTrap(Boolean(item), dialogRef, onClose);
+
+  const prev = useCallback(() => {
+    if (!items.length) return;
+    const nextIdx = (index - 1 + items.length) % items.length;
+    onSelectId(items[nextIdx].id);
+  }, [index, items, onSelectId]);
+
+  const next = useCallback(() => {
+    if (!items.length) return;
+    const nextIdx = (index + 1) % items.length;
+    onSelectId(items[nextIdx].id);
+  }, [index, items, onSelectId]);
+
   useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
     const onKey = (e) => {
-      if (e.key === "Escape") onClose();
       if (e.key === "ArrowLeft") next();
       if (e.key === "ArrowRight") prev();
     };
     document.addEventListener("keydown", onKey);
-    return () => { document.body.style.overflow = previous; document.removeEventListener("keydown", onKey); };
-  }, [onClose, next, prev]);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [next, prev]);
+
+  if (!item) return null;
+
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={item.title} className="fixed inset-0 z-50 flex flex-col bg-charcoal-900/95 text-ivory-50 page-enter" onClick={onClose}>
-      <div className="flex items-center justify-between p-4" onClick={(e) => e.stopPropagation()}>
-        <p className="font-semibold">{item.title}</p>
-        <button ref={closeRef} type="button" onClick={onClose} aria-label="بستن" className="grid size-11 place-items-center rounded-full border border-ivory-50/30"><X className="size-5" aria-hidden /></button>
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label={item.title}
+      className="fixed inset-0 z-50 flex flex-col bg-forest-950/95 text-ivory-50 backdrop-blur-md page-enter"
+      onClick={onClose}
+    >
+      <div className="flex items-center justify-between border-b border-ivory-50/10 px-5 py-4" onClick={(e) => e.stopPropagation()}>
+        <div>
+          <p className="font-bold text-ivory-50">{item.title}</p>
+          <p className="mt-0.5 text-xs text-brass-300 num">
+            تصویر {toFa(index + 1)} از {toFa(items.length)}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="بستن نمایشگر تصویر"
+          className="btn-press grid size-11 place-items-center rounded-full border border-ivory-50/30 text-ivory-50 hover:border-brass-300 hover:text-brass-300"
+        >
+          <X className="size-5" aria-hidden />
+        </button>
       </div>
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-4 sm:px-16" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={prev} aria-label="تصویر قبلی" className="absolute end-1 z-10 grid size-11 place-items-center rounded-full bg-charcoal-900/70 sm:end-4"><ChevronRight className="size-5" aria-hidden /></button>
-        <img key={item.id} src={pexelsUrl(item.id, 1200)} alt={item.alt} className="img-fade is-loaded max-h-full max-w-full rounded-xl object-contain" style={{ aspectRatio: `${item.width} / ${item.height}` }} />
-        <button type="button" onClick={next} aria-label="تصویر بعدی" className="absolute start-1 z-10 grid size-11 place-items-center rounded-full bg-charcoal-900/70 sm:start-4"><ChevronLeft className="size-5" aria-hidden /></button>
+      <div className="relative flex min-h-0 flex-1 items-center justify-center px-3 py-4 sm:px-20" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          onClick={prev}
+          aria-label="تصویر قبلی"
+          className="btn-press absolute end-2 z-10 grid size-12 place-items-center rounded-full border border-ivory-50/25 bg-forest-900/80 text-ivory-50 hover:border-brass-300 sm:end-6"
+        >
+          <ChevronRight className="size-5" aria-hidden />
+        </button>
+        <img
+          key={item.id}
+          src={pexelsUrl(item.id, 1200)}
+          alt={item.alt}
+          className="img-fade is-loaded max-h-full max-w-full rounded-2xl border border-ivory-50/15 object-contain shadow-2xl"
+          style={{ aspectRatio: `${item.width} / ${item.height}` }}
+        />
+        <button
+          type="button"
+          onClick={next}
+          aria-label="تصویر بعدی"
+          className="btn-press absolute start-2 z-10 grid size-12 place-items-center rounded-full border border-ivory-50/25 bg-forest-900/80 text-ivory-50 hover:border-brass-300 sm:start-6"
+        >
+          <ChevronLeft className="size-5" aria-hidden />
+        </button>
       </div>
-      <p className="pb-4 text-center text-sm text-ivory-300 num" onClick={(e) => e.stopPropagation()}>{(index + 1).toLocaleString("fa-IR")} از {items.length.toLocaleString("fa-IR")}</p>
+      <div className="flex items-center justify-center gap-4 border-t border-ivory-50/10 px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
+        <Btn to="/book" variant="brass" size="sm" onClick={onClose}>
+          رزرو استایل مشابه <ArrowLeft className="size-4" aria-hidden />
+        </Btn>
+      </div>
     </div>,
     document.body,
   );
 }
 
 export default function Portfolio() {
-  const [params] = useSearchParams();
+  const [params, setParams] = useSearchParams();
   const [category, setCategory] = useState("all");
-  const [open, setOpen] = useState(() => {
+  const [activeId, setActiveId] = useState(() => {
     const wanted = Number(params.get("photo"));
-    const index = wanted ? portfolio.findIndex((p) => p.id === wanted) : -1;
-    return index >= 0 ? index : null;
+    return wanted && portfolio.some((p) => p.id === wanted) ? wanted : null;
   });
+
   const items = useMemo(() => (category === "all" ? portfolio : portfolio.filter((p) => p.category === category)), [category]);
-  const openItem = (item) => setOpen(items.findIndex((p) => p.id === item.id));
+
+  const openPhoto = useCallback(
+    (id) => {
+      setActiveId(id);
+      const next = new URLSearchParams(params);
+      if (id) next.set("photo", String(id));
+      else next.delete("photo");
+      setParams(next, { replace: true });
+    },
+    [params, setParams],
+  );
+
+  const closeViewer = useCallback(() => openPhoto(null), [openPhoto]);
+
+  const countsByCategory = useMemo(() => {
+    const counts = { all: portfolio.length };
+    for (const p of portfolio) counts[p.category] = (counts[p.category] ?? 0) + 1;
+    return counts;
+  }, []);
+
+  // Ensure lightbox always operates on a valid array containing activeId
+  const viewerItems = useMemo(() => {
+    if (!activeId) return items;
+    return items.some((p) => p.id === activeId) ? items : portfolio;
+  }, [items, activeId]);
+
   return (
     <>
-      <Seo title="نمونه‌کارها" description="گالری مدل مو، فرم ریش و تحول داماد در استودیو خانه داماد لاهیجان." image={pexelsUrl(portfolio[3].id, 1200)} />
-      <PageHero title="گالری کات، ریش و تحول داماد" lead="با فیلتر دسته‌بندی، مدل دلخواه را پیدا کنید و روی هر تصویر برای نمای بزرگ‌تر بزنید." />
-      <Container className="py-12">
-        <div role="group" aria-label="فیلتر دسته‌بندی" className="mb-8 flex flex-wrap gap-2">
-          {portfolioCategories.map((c) => (
-            <button key={c.key} type="button" aria-pressed={category === c.key} onClick={() => setCategory(c.key)} className={cn("btn-press rounded-full border px-5 py-2 text-sm font-semibold transition-colors", category === c.key ? "border-forest-700 bg-forest-700 text-ivory-50" : "border-forest-700/30 text-forest-800 hover:bg-forest-50")}>{c.label}</button>
-          ))}
+      <Seo
+        title="نمونه‌کارها"
+        description="گالری مدل مو، فرم ریش و تحول داماد در استودیو خانه داماد لاهیجان."
+        image={pexelsUrl(portfolio[3].id, 1200)}
+      />
+      <PageHero
+        eyebrow="آرشیو استودیو · نمونه‌کارها"
+        title="گالری کات، ریش و تشریفات داماد"
+        lead="با انتخاب دسته‌بندی مورد نظر، جزئیات هر استایل را ببینید و روی هر تصویر برای نمایش تمام‌صفحه بزنید."
+      >
+        <div role="group" aria-label="فیلتر دسته‌بندی" className="mt-8 flex flex-wrap gap-2.5">
+          {portfolioCategories.map((c) => {
+            const active = category === c.key;
+            return (
+              <button
+                key={c.key}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setCategory(c.key)}
+                className={cn(
+                  "btn-press rounded-full border px-5 py-2 text-sm font-bold transition-colors",
+                  active
+                    ? "border-brass-400 bg-brass-400 text-charcoal-900"
+                    : "border-ivory-50/25 bg-ivory-50/10 text-ivory-50 hover:border-brass-300 hover:bg-ivory-50/20",
+                )}
+              >
+                {c.label} <span className={cn("num ms-1 text-xs", active ? "text-charcoal-800" : "text-brass-300")}>({toFa(countsByCategory[c.key] ?? 0)})</span>
+              </button>
+            );
+          })}
         </div>
-        <ul className="columns-2 gap-3 sm:gap-5 lg:columns-3 [&>li]:mb-3 sm:[&>li]:mb-5 [&>li]:break-inside-avoid">
-          {items.map((item) => (<li key={item.id}><PortfolioTile item={item} onOpen={openItem} /></li>))}
+      </PageHero>
+
+      <Container className="py-12 sm:py-16">
+        <ul className="columns-2 gap-4 sm:gap-6 lg:columns-3 [&>li]:mb-4 sm:[&>li]:mb-6 [&>li]:break-inside-avoid">
+          {items.map((item) => (
+            <li key={item.id}>
+              <PortfolioTile item={item} onOpen={(picked) => openPhoto(picked.id)} />
+            </li>
+          ))}
         </ul>
-        <div className="mt-10 text-center"><Btn to="/book" size="lg">استایل دلخواهت را رزرو کن</Btn></div>
+        <div className="mt-12 text-center">
+          <Btn to="/book" size="lg">
+            استایل دلخواهت را رزرو کن <ArrowLeft className="size-5" aria-hidden />
+          </Btn>
+        </div>
       </Container>
-      {open !== null && items[open] ? <Viewer items={items} index={open} onClose={() => setOpen(null)} onIndex={setOpen} /> : null}
+
+      {activeId !== null ? <Viewer items={viewerItems} activeId={activeId} onClose={closeViewer} onSelectId={openPhoto} /> : null}
       <FinalCta />
     </>
   );
