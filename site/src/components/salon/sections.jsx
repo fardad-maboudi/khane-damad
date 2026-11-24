@@ -277,9 +277,10 @@ export function PortfolioTile({ item, onOpen, ratio, className }) {
 export function FinalCta({
   title = "نوبت بعدی‌ات را بدون انتظار رزرو کن",
   text = "خدمت و استاد پیرایشگر دلخواهت را انتخاب کن؛ فقط ساعت‌های واقعاً آزاد نمایش داده می‌شود.",
+  className,
 }) {
   return (
-    <section aria-labelledby="final-cta" className="pt-4">
+    <section aria-labelledby="final-cta" className={cn("pt-2", className)}>
       <Container>
         <Reveal className="forest-canvas relative overflow-hidden rounded-[2rem] border border-brass-500/35 px-6 py-14 text-center text-ivory-50 shadow-[0_32px_64px_-28px_rgb(15_32_25/0.65)] sm:px-12 sm:py-20">
           <div
@@ -347,9 +348,9 @@ export function CatalogEmpty() {
 }
 
 /** Stamp card: bespoke gentleman's club membership card with 5 brass seals. */
-export function LoyaltyBand() {
+export function LoyaltyBand({ className }) {
   return (
-    <section aria-labelledby="loyalty-title" className="py-[var(--space-section)]">
+    <section aria-labelledby="loyalty-title" className={cn("py-6 sm:py-8", className)}>
       <Container>
         <Reveal className="relative overflow-hidden rounded-[2rem] border border-brass-400/60 bg-ivory-50 p-6 shadow-[0_24px_50px_-28px_rgb(15_32_25/0.3)] sm:p-10 lg:p-12">
           <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[1.5rem] border border-brass-400/25" />

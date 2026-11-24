@@ -32,7 +32,7 @@ function Hero({ counts }) {
             <Scissors className="size-3.5 text-brass-600" aria-hidden />
             {hero.eyebrow}
           </p>
-          <h1 id="hero-title" className="mt-5 text-[2.45rem] font-extrabold leading-[1.24] text-forest-900 sm:text-5xl lg:text-[4.35rem]">
+          <h1 id="hero-title" className="mt-5 text-[2.45rem] font-extrabold !leading-[1.36] text-forest-900 sm:text-5xl sm:!leading-[1.34] lg:text-[4.35rem] lg:!leading-[1.28]">
             {words.map((word, i) => (
               <Fragment key={word + i}>
                 <span className="hero-rise inline-block" style={{ "--i": i + 1 }}>

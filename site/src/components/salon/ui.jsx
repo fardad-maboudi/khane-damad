@@ -166,7 +166,10 @@ export function Btn({ to, href, variant, size, className, children, ...rest }) {
 export function SectionHeading({ eyebrow, title, lead, as: Tag = "h2", id, align = "start", tone = "dark", size = "md", className }) {
   const light = tone === "light";
   const centered = align === "center";
-  const titleSize = size === "xl" ? "text-4xl sm:text-5xl lg:text-[3.35rem]" : "text-3xl sm:text-4xl";
+  const titleSize =
+    size === "xl"
+      ? "text-3xl !leading-[1.48] sm:text-5xl sm:!leading-[1.42] lg:text-[3.25rem] lg:!leading-[1.38]"
+      : "text-3xl !leading-[1.42] sm:text-4xl sm:!leading-[1.38]";
   return (
     <div className={cn("max-w-2xl", centered && "mx-auto text-center", className)}>
       {eyebrow ? (
@@ -175,7 +178,7 @@ export function SectionHeading({ eyebrow, title, lead, as: Tag = "h2", id, align
           {eyebrow}
         </p>
       ) : null}
-      <Tag id={id} className={cn("font-extrabold leading-[1.35]", titleSize, light ? "text-ivory-50" : "text-forest-900")}>
+      <Tag id={id} className={cn("font-extrabold", titleSize, light ? "text-ivory-50" : "text-forest-900")}>
         {title}
       </Tag>
       {lead ? <p className={cn("mt-4 text-base leading-8 sm:text-lg", light ? "text-ivory-200/90" : "text-neutral-700")}>{lead}</p> : null}

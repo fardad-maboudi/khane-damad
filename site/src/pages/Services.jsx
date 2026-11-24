@@ -36,7 +36,7 @@ export default function Services() {
         ) : null}
       </PageHero>
 
-      <Container className="py-14 sm:py-16">
+      <Container className="pt-14 pb-6 sm:pt-16 sm:pb-8">
         {isLoading ? <Spinner label="در حال دریافت خدمات…" /> : null}
         {isError ? <ErrorState title="دریافت خدمات ممکن نشد" text="اتصال به سرور برقرار نشد." onRetry={() => refetch()} /> : null}
         {data && !groups.length ? <CatalogEmpty /> : null}
