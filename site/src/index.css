@@ -1,6 +1,3 @@
-@import "@fontsource/aref-ruqaa/index.css";
-@import "@fontsource-variable/estedad/index.css";
-@import "@fontsource-variable/vazirmatn/index.css";
 @import "./styles/site.css";
 
 @tailwind base;

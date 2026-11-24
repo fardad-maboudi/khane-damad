@@ -117,7 +117,7 @@ export function Photo({ id, src, alt, ratio = "4 / 5", sizes = "(min-width: 1024
         width={width}
         height={height}
         loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
+        fetchpriority={priority ? "high" : "auto"}
         decoding="async"
         onLoad={() => setLoaded(true)}
         onError={() => setLoaded(true)}

@@ -73,17 +73,72 @@
   --space-section: 4rem;
   --shadow-md: 0 12px 32px rgb(23 24 26 / 0.1);
 
-  --font-estedad: "Estedad Variable", "Estedad", "Vazirmatn Variable", "Vazirmatn", Tahoma, system-ui, sans-serif;
-  --font-vazirmatn: "Vazirmatn Variable", "Vazirmatn", Tahoma, system-ui, sans-serif;
+  --font-estedad: "Estedad", "Vazirmatn", Tahoma, system-ui, sans-serif;
+  --font-vazirmatn: "Vazirmatn", Tahoma, system-ui, sans-serif;
   --font-heading: var(--font-estedad);
   --font-body: var(--font-vazirmatn);
-  --font-display: "Aref Ruqaa", "Estedad Variable", "Estedad", system-ui, serif;
+  --font-display: "Aref Ruqaa", "Estedad", system-ui, serif;
 }
 
 @media (min-width: 768px) {
   :root {
     --space-section: 6rem;
   }
+}
+
+/* Self-hosted Persian & Latin WOFF2 fonts in site/public/fonts (zero external npm packages needed) */
+@font-face {
+  font-family: "Aref Ruqaa";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/aref-ruqaa-400.woff2") format("woff2");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: "Aref Ruqaa";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/aref-ruqaa-latin-400.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F;
+}
+
+@font-face {
+  font-family: "Estedad";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/estedad-arabic-wght.woff2") format("woff2-variations");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: "Estedad";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/estedad-latin-wght.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/vazirmatn-arabic-wght.woff2") format("woff2-variations");
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-08FF, U+200C-200E, U+FB50-FDFF, U+FE70-FEFC;
+}
+
+@font-face {
+  font-family: "Vazirmatn";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/vazirmatn-latin-wght.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F;
 }
 
 html {
