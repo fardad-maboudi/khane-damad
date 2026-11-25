@@ -202,9 +202,9 @@ export function QuickContact({ className, size = "md" }) {
   );
 }
 
-export function LocationSection({ heading = true }) {
+export function LocationSection({ heading = true, className }) {
   return (
-    <section aria-labelledby="location-title" className="py-[var(--space-section)]">
+    <section aria-labelledby="location-title" className={cn("pt-6 pb-8 sm:pt-8 sm:pb-10", className)}>
       <Container>
         {heading ? (
           <SectionHeading
@@ -280,7 +280,7 @@ export function FinalCta({
   className,
 }) {
   return (
-    <section aria-labelledby="final-cta" className={cn("pt-2", className)}>
+    <section aria-labelledby="final-cta" className={cn("pt-6 sm:pt-8", className)}>
       <Container>
         <Reveal className="forest-canvas relative overflow-hidden rounded-[2rem] border border-brass-500/35 px-6 py-14 text-center text-ivory-50 shadow-[0_32px_64px_-28px_rgb(15_32_25/0.65)] sm:px-12 sm:py-20">
           <div
@@ -350,7 +350,7 @@ export function CatalogEmpty() {
 /** Stamp card: bespoke gentleman's club membership card with 5 brass seals. */
 export function LoyaltyBand({ className }) {
   return (
-    <section aria-labelledby="loyalty-title" className={cn("py-6 sm:py-8", className)}>
+    <section aria-labelledby="loyalty-title" className={cn("py-0", className)}>
       <Container>
         <Reveal className="relative overflow-hidden rounded-[2rem] border border-brass-400/60 bg-ivory-50 p-6 shadow-[0_24px_50px_-28px_rgb(15_32_25/0.3)] sm:p-10 lg:p-12">
           <div aria-hidden className="pointer-events-none absolute inset-2.5 rounded-[1.5rem] border border-brass-400/25" />

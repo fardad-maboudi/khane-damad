@@ -297,7 +297,7 @@ function TeamSection({ catalog }) {
   const { data } = catalog;
   if (!data?.barbers.length) return null;
   return (
-    <section aria-labelledby="team-title" className="py-[var(--space-section)]">
+    <section aria-labelledby="team-title" className="pt-[var(--space-section)] pb-6 sm:pb-8">
       <Container>
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <SectionHeading
