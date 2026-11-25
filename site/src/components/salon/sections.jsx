@@ -16,14 +16,16 @@ export function ServiceCard({ service, className, large = false, wide = false })
         className,
       )}
     >
+      {/* Media grows to absorb any spare height of a stretched grid cell, so a card never
+          shows an empty band above or below the photo. */}
       <div
         className={cn(
-          "img-zoom relative flex shrink-0 overflow-hidden",
+          "img-zoom relative flex overflow-hidden",
           wide
-            ? "aspect-[16/10] sm:aspect-auto sm:w-[44%] sm:self-stretch sm:min-h-[14rem]"
+            ? "aspect-[16/10] sm:aspect-auto sm:w-[45%] sm:shrink-0 sm:self-stretch sm:min-h-[15rem]"
             : large
-              ? "aspect-[16/10] lg:aspect-auto lg:min-h-[22rem] lg:flex-1 lg:shrink"
-              : "aspect-[16/10]",
+              ? "aspect-[16/10] lg:aspect-auto lg:min-h-[24rem] lg:flex-1"
+              : "aspect-[16/10] lg:aspect-auto lg:min-h-[10rem] lg:flex-1",
         )}
       >
         <Photo
@@ -36,17 +38,28 @@ export function ServiceCard({ service, className, large = false, wide = false })
         <span className="absolute start-3.5 top-3.5 rounded-full border border-ivory-50/25 bg-forest-900/80 px-3 py-1 text-[0.72rem] font-bold text-brass-200 backdrop-blur-sm">
           {service.group}
         </span>
+        {large ? (
+          <span className="absolute end-3.5 top-3.5 hidden items-center gap-1.5 rounded-full border border-brass-300/40 bg-brass-400 px-3 py-1 text-[0.72rem] font-extrabold text-charcoal-900 sm:inline-flex">
+            <Sparkles className="size-3" aria-hidden /> پیشنهاد استودیو
+          </span>
+        ) : null}
         {service.package ? (
           <span className="absolute bottom-3 end-3 rounded-full bg-brass-400 px-2.5 py-0.5 text-[0.7rem] font-extrabold text-charcoal-900">
             دارای بسته تخفیفی
           </span>
         ) : null}
       </div>
-      <div className={cn("flex flex-1 flex-col p-6", large && "sm:p-7")}>
-        <h3 className={cn("font-bold leading-snug text-forest-900 transition-colors group-hover:text-forest-700", large ? "text-2xl sm:text-[1.65rem]" : "text-lg sm:text-xl")}>
+      <div
+        className={cn(
+          "flex shrink-0 flex-col p-6",
+          large && "sm:p-7",
+          wide && "sm:flex-1 sm:justify-center sm:p-7",
+        )}
+      >
+        <h3 className={cn("font-bold leading-snug text-forest-900 transition-colors group-hover:text-forest-700", large ? "text-2xl sm:text-[1.7rem]" : "text-lg sm:text-xl")}>
           {service.name}
         </h3>
-        <p className={cn("mt-2.5 line-clamp-3 text-sm leading-7 text-neutral-700", !large && "flex-1")}>{service.description}</p>
+        <p className="mt-2.5 line-clamp-3 text-sm leading-7 text-neutral-700">{service.description}</p>
         <dl className="mt-5 flex items-center justify-between border-t border-ivory-200 pt-4 text-sm">
           <div>
             <dt className="sr-only">مدت</dt>

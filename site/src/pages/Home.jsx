@@ -151,7 +151,7 @@ function ServicesSection({ catalog }) {
             همه خدمات و جدول تعرفه <ArrowLeft className="size-4 text-brass-600" aria-hidden />
           </Link>
         </div>
-        <div className="mt-12 grid gap-6 lg:grid-cols-[1.25fr_1fr_1fr] lg:grid-rows-2">
+        <div className="mt-12 grid gap-6 lg:grid-cols-[1.28fr_1fr_1fr] lg:items-stretch">
           {isLoading ? [0, 1, 2, 3].map((n) => <ServiceCardSkeleton key={n} />) : null}
           {isError ? (
             <div className="col-span-full">
