@@ -276,12 +276,17 @@ export function PortfolioTile({ item, onOpen, ratio, fill = false, className }) 
         ratio={fill ? null : ratio || `${item.width} / ${item.height}`}
         sizes="(min-width: 1024px) 30vw, 48vw"
       />
-      {/* Caption sits on its own soft-shadowed plate: the photo stays untouched, only the
-          text gets a dark, blurred backdrop so it stays legible over any image. */}
+      {/* Caption: the words sit in the lower band of the photo on a soft, blurred dark
+          halo. Nothing is applied to the rest of the image — no gradient, no veil. */}
       <span className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3 pb-3 sm:px-4 sm:pb-4">
-        <span className="flex max-w-full flex-col items-center rounded-2xl border border-ivory-50/15 bg-forest-950/75 px-3.5 py-2 text-center text-ivory-50 shadow-[0_16px_32px_-14px_rgb(0_0_0/0.8)] backdrop-blur-md transition-[opacity,transform] duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-visible:translate-y-0 sm:group-focus-visible:opacity-100">
-          <span className="text-[0.68rem] font-bold tracking-[0.14em] text-brass-300 sm:text-[0.72rem]">{categoryLabels[item.category] || "نمونه‌کار"}</span>
-          <span className="mt-1 text-[0.9rem] font-extrabold leading-snug sm:text-[1.05rem]">{item.title}</span>
+        <span className="relative flex max-w-full flex-col items-center rounded-2xl px-4 py-2 text-center text-ivory-50 transition-[opacity,transform] duration-300 sm:translate-y-1.5 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-visible:translate-y-0 sm:group-focus-visible:opacity-100">
+          <span aria-hidden className="absolute -inset-x-2 -inset-y-1 rounded-2xl bg-forest-950/60 blur-[10px]" />
+          <span className="relative text-[0.68rem] font-bold tracking-[0.14em] text-brass-300 [text-shadow:0_1px_8px_rgb(0_0_0/0.6)] sm:text-[0.72rem]">
+            {categoryLabels[item.category] || "نمونه‌کار"}
+          </span>
+          <span className="relative mt-1 text-[0.9rem] font-extrabold leading-snug [text-shadow:0_1px_10px_rgb(0_0_0/0.65)] sm:text-[1.05rem]">
+            {item.title}
+          </span>
         </span>
       </span>
       <span
