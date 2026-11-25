@@ -127,6 +127,32 @@ export default function Portfolio() {
       ? "همه نمونه‌کارها"
       : portfolioCategories.find((c) => c.key === category)?.label ?? "نمونه‌کارها";
 
+  /**
+   * Editorial 12-column mosaic. On desktop every row carries tiles of different widths
+   * (5 / 4 / 3 of 12 columns) and the widths mirror on alternating rows, so the wall
+   * reads like a magazine spread rather than an even grid. Whatever the filter leaves
+   * behind, the closing rows are regrouped into 7+5 / 5+7 pairs so the mosaic always
+   * adds up to a full 12 columns and never leaves a hole.
+   */
+  const tileSpan = (index, total) => {
+    if (total === 1) return "lg:col-span-12";
+    if (total === 2) return index === 0 ? "lg:col-span-7" : "lg:col-span-5";
+
+    const tailPair = ["lg:col-span-7", "lg:col-span-5"];
+    const remainder = total % 3;
+    if (remainder === 2 && index >= total - 2) return tailPair[index - (total - 2)];
+    if (remainder === 1 && index >= total - 4) {
+      return ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-span-7"][index - (total - 4)];
+    }
+
+    const row = Math.floor(index / 3);
+    const pattern =
+      row % 2 === 0
+        ? ["lg:col-span-5", "lg:col-span-4", "lg:col-span-3"]
+        : ["lg:col-span-3", "lg:col-span-4", "lg:col-span-5"];
+    return pattern[index % 3];
+  };
+
   const countsByCategory = useMemo(() => {
     const counts = { all: portfolio.length };
     for (const p of portfolio) counts[p.category] = (counts[p.category] ?? 0) + 1;
@@ -184,9 +210,12 @@ export default function Portfolio() {
               برای دیدن اندازه کامل، روی هر تصویر بزنید
             </p>
           </div>
-          <ul className="mt-8 grid grid-cols-2 gap-4 sm:mt-10 sm:gap-7 lg:grid-cols-3 lg:gap-9">
-            {items.map((item) => (
-              <li key={item.id} className="relative aspect-[4/5]">
+          <ul className="mt-8 grid grid-cols-2 gap-4 sm:mt-10 sm:gap-6 lg:auto-rows-[23rem] lg:grid-cols-12 lg:gap-x-8 lg:gap-y-10">
+            {items.map((item, index) => (
+              <li
+                key={item.id}
+                className={cn("relative aspect-[4/5] lg:aspect-auto", tileSpan(index, items.length))}
+              >
                 <PortfolioTile item={item} fill className="h-full" onOpen={(picked) => openPhoto(picked.id)} />
               </li>
             ))}

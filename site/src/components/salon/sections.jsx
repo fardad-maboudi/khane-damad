@@ -276,10 +276,13 @@ export function PortfolioTile({ item, onOpen, ratio, fill = false, className }) 
         ratio={fill ? null : ratio || `${item.width} / ${item.height}`}
         sizes="(min-width: 1024px) 30vw, 48vw"
       />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end bg-gradient-to-t from-forest-950/92 via-forest-950/45 to-transparent px-4 pb-4 pt-12 text-center text-ivory-50 transition-opacity duration-300 sm:pb-5 sm:pt-20 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
-        <span className="text-[0.7rem] font-bold tracking-[0.16em] text-brass-300 sm:text-[0.78rem]">{categoryLabels[item.category] || "نمونه‌کار"}</span>
-        <span aria-hidden className="mt-1.5 h-px w-7 bg-brass-400/70 sm:mt-2 sm:w-10" />
-        <span className="mt-1.5 text-[0.95rem] font-extrabold leading-snug sm:mt-2 sm:text-lg">{item.title}</span>
+      {/* Caption sits on its own soft-shadowed plate: the photo stays untouched, only the
+          text gets a dark, blurred backdrop so it stays legible over any image. */}
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center px-3 pb-3 sm:px-4 sm:pb-4">
+        <span className="flex max-w-full flex-col items-center rounded-2xl border border-ivory-50/15 bg-forest-950/75 px-3.5 py-2 text-center text-ivory-50 shadow-[0_16px_32px_-14px_rgb(0_0_0/0.8)] backdrop-blur-md transition-[opacity,transform] duration-300 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-visible:translate-y-0 sm:group-focus-visible:opacity-100">
+          <span className="text-[0.68rem] font-bold tracking-[0.14em] text-brass-300 sm:text-[0.72rem]">{categoryLabels[item.category] || "نمونه‌کار"}</span>
+          <span className="mt-1 text-[0.9rem] font-extrabold leading-snug sm:text-[1.05rem]">{item.title}</span>
+        </span>
       </span>
       <span
         aria-hidden
