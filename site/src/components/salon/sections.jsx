@@ -1,4 +1,4 @@
-import { Clock, Navigation, Phone, ExternalLink, ArrowLeft, Quote, Scissors, Sparkles, MapPin } from "lucide-react";
+import { Clock, Navigation, Phone, ExternalLink, ArrowLeft, Quote, Scissors, Sparkles, MapPin, Maximize2 } from "lucide-react";
 import { Btn, Container, EmptyState, Photo, Reveal, SectionHeading, Stars, WhatsappIcon, TelegramIcon, InstagramIcon } from "@/components/salon/ui.jsx";
 import { contact, hours, loyalty, teamExtras, pexelsUrl } from "@/content/salon.js";
 import { formatDuration, formatPrice, toFa } from "@/lib/fa.js";
@@ -276,15 +276,22 @@ export function PortfolioTile({ item, onOpen, ratio, fill = false, className }) 
         ratio={fill ? null : ratio || `${item.width} / ${item.height}`}
         sizes="(min-width: 1024px) 30vw, 48vw"
       />
-      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-forest-950/90 via-forest-950/35 to-transparent p-4 pt-14 text-ivory-50 opacity-95 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
-        <span className="text-[0.7rem] font-bold text-brass-300">{categoryLabels[item.category] || "نمونه‌کار"}</span>
-        <span className="mt-0.5 text-sm font-bold">{item.title}</span>
+      <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col items-center justify-end bg-gradient-to-t from-forest-950/92 via-forest-950/45 to-transparent px-4 pb-4 pt-12 text-center text-ivory-50 transition-opacity duration-300 sm:pb-5 sm:pt-20 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
+        <span className="text-[0.7rem] font-bold tracking-[0.16em] text-brass-300 sm:text-[0.78rem]">{categoryLabels[item.category] || "نمونه‌کار"}</span>
+        <span aria-hidden className="mt-1.5 h-px w-7 bg-brass-400/70 sm:mt-2 sm:w-10" />
+        <span className="mt-1.5 text-[0.95rem] font-extrabold leading-snug sm:mt-2 sm:text-lg">{item.title}</span>
+      </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute end-3.5 top-3.5 hidden size-9 place-items-center rounded-full border border-ivory-50/35 bg-forest-950/45 text-ivory-50 opacity-0 backdrop-blur-sm transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 sm:grid"
+      >
+        <Maximize2 className="size-4" aria-hidden />
       </span>
     </>
   );
 
   const sharedClasses = cn(
-    "img-zoom group relative block w-full overflow-hidden rounded-[1.35rem] border border-ivory-300/80 bg-ivory-200 text-start transition-[border-color,box-shadow] duration-300 hover:border-brass-400 hover:shadow-[0_20px_40px_-22px_rgb(15_32_25/0.45)]",
+    "img-zoom group relative block w-full overflow-hidden rounded-[1.35rem] border border-ivory-300/80 bg-ivory-200 text-start transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brass-400 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.5)]",
     className,
   );
 

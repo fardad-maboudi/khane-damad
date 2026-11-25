@@ -122,6 +122,11 @@ export default function Portfolio() {
 
   const closeViewer = useCallback(() => openPhoto(null), [openPhoto]);
 
+  const activeLabel =
+    category === "all"
+      ? "همه نمونه‌کارها"
+      : portfolioCategories.find((c) => c.key === category)?.label ?? "نمونه‌کارها";
+
   const countsByCategory = useMemo(() => {
     const counts = { all: portfolio.length };
     for (const p of portfolio) counts[p.category] = (counts[p.category] ?? 0) + 1;
@@ -169,15 +174,25 @@ export default function Portfolio() {
         </div>
       </PageHero>
 
-      <Container className="py-12 sm:py-16">
-        <ul className="columns-2 gap-4 sm:gap-6 lg:columns-3 [&>li]:mb-4 sm:[&>li]:mb-6 [&>li]:break-inside-avoid">
-          {items.map((item) => (
-            <li key={item.id}>
-              <PortfolioTile item={item} onOpen={(picked) => openPhoto(picked.id)} />
-            </li>
-          ))}
-        </ul>
-        <div className="mt-12 text-center">
+      <Container className="py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 border-b border-ivory-300/80 pb-4">
+            <p className="text-sm font-extrabold text-forest-900">
+              {activeLabel} <span className="num ms-1 font-medium text-neutral-600">· {toFa(items.length)} تصویر</span>
+            </p>
+            <p className="hidden text-xs font-medium text-neutral-600 sm:block">
+              برای دیدن اندازه کامل، روی هر تصویر بزنید
+            </p>
+          </div>
+          <ul className="mt-8 grid grid-cols-2 gap-4 sm:mt-10 sm:gap-7 lg:grid-cols-3 lg:gap-9">
+            {items.map((item) => (
+              <li key={item.id} className="relative aspect-[4/5]">
+                <PortfolioTile item={item} fill className="h-full" onOpen={(picked) => openPhoto(picked.id)} />
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="mt-14 text-center">
           <Btn to="/book" size="lg">
             استایل دلخواهت را رزرو کن <ArrowLeft className="size-5" aria-hidden />
           </Btn>
