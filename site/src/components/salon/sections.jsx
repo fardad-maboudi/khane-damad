@@ -16,13 +16,21 @@ export function ServiceCard({ service, className, large = false, wide = false })
         className,
       )}
     >
-      <div className={cn("img-zoom relative overflow-hidden", wide && "sm:w-[44%] sm:shrink-0", large && "lg:flex lg:min-h-[22rem] lg:flex-1 lg:flex-col")}>
+      <div
+        className={cn(
+          "img-zoom relative flex shrink-0 overflow-hidden",
+          wide
+            ? "aspect-[16/10] sm:aspect-auto sm:w-[44%] sm:self-stretch sm:min-h-[14rem]"
+            : large
+              ? "aspect-[16/10] lg:aspect-auto lg:min-h-[22rem] lg:flex-1 lg:shrink"
+              : "aspect-[16/10]",
+        )}
+      >
         <Photo
           src={service.image}
           alt={`${service.name} در خانه داماد`}
-          ratio="16 / 10"
+          fill
           sizes="(min-width: 1024px) 32vw, 92vw"
-          className={cn(wide && "sm:!aspect-auto sm:h-full sm:min-h-[14rem]", large && "lg:!aspect-auto lg:h-full lg:flex-1")}
         />
         <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-950/50 via-transparent to-transparent" />
         <span className="absolute start-3.5 top-3.5 rounded-full border border-ivory-50/25 bg-forest-900/80 px-3 py-1 text-[0.72rem] font-bold text-brass-200 backdrop-blur-sm">
@@ -239,7 +247,7 @@ export function LocationSection({ heading = true, className }) {
 
 /* ---------------- Portfolio grid ---------------- */
 
-export function PortfolioTile({ item, onOpen, ratio, className }) {
+export function PortfolioTile({ item, onOpen, ratio, fill = false, className }) {
   const categoryLabels = {
     haircut: "مدل مو",
     beard: "ریش و تیغ",
@@ -248,7 +256,13 @@ export function PortfolioTile({ item, onOpen, ratio, className }) {
   };
   const content = (
     <>
-      <Photo id={item.id} alt={item.alt} ratio={ratio || `${item.width} / ${item.height}`} sizes="(min-width: 1024px) 30vw, 48vw" />
+      <Photo
+        id={item.id}
+        alt={item.alt}
+        fill={fill}
+        ratio={fill ? null : ratio || `${item.width} / ${item.height}`}
+        sizes="(min-width: 1024px) 30vw, 48vw"
+      />
       <span className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-forest-950/90 via-forest-950/35 to-transparent p-4 pt-14 text-ivory-50 opacity-95 transition-opacity duration-300 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-visible:opacity-100">
         <span className="text-[0.7rem] font-bold text-brass-300">{categoryLabels[item.category] || "نمونه‌کار"}</span>
         <span className="mt-0.5 text-sm font-bold">{item.title}</span>

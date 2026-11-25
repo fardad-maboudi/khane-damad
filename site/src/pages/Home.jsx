@@ -18,6 +18,7 @@ import {
 import { averageRating } from "@/lib/salon-helpers.js";
 import { brand, contact, hero, offer, portfolio, reviews } from "@/content/salon.js";
 import { toFa } from "@/lib/fa.js";
+import { cn } from "@/lib/utils";
 import { groupServices, useCatalog } from "@/lib/salon-api.js";
 
 function Hero({ counts }) {
@@ -205,9 +206,9 @@ function OfferSection({ services }) {
               <span className="text-sm font-semibold text-brass-300 num">{offer.until}</span>
             </div>
           </div>
-          <div className="relative min-h-[18rem] md:min-h-[24rem]">
-            <Photo id={offer.image.id} alt={offer.image.alt} ratio="4 / 3" sizes="(min-width: 768px) 38vw, 92vw" className="h-full min-h-[18rem] md:!aspect-auto" />
-            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-950/50 via-transparent to-transparent md:bg-gradient-to-e md:from-forest-900/60" />
+          <div className="relative aspect-[4/3] min-h-[18rem] md:aspect-auto md:h-full md:min-h-[24rem]">
+            <Photo id={offer.image.id} alt={offer.image.alt} fill sizes="(min-width: 768px) 38vw, 92vw" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-950/50 via-transparent to-transparent md:bg-gradient-to-l md:from-forest-900/55" />
           </div>
         </Reveal>
       </Container>
@@ -215,7 +216,7 @@ function OfferSection({ services }) {
   );
 }
 
-/** Genuine editorial asymmetric gallery layout (replaces the no-op lg:row-span-1 bug) */
+/** Genuine editorial asymmetric gallery layout (every tile stretches edge-to-edge in its cell) */
 function WorkSection() {
   const picks = [portfolio[0], portfolio[3], portfolio[2], portfolio[7], portfolio[5]];
   return (
@@ -233,20 +234,20 @@ function WorkSection() {
           </Link>
         </div>
 
-        <ul className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-12">
+        <ul className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-12 lg:grid-rows-[repeat(2,minmax(17rem,1fr))]">
           {/* Editorial lead portrait spanning 5 cols & 2 rows on desktop */}
-          <li className="col-span-2 lg:col-span-5 lg:row-span-2">
+          <li className="col-span-2 aspect-[4/4.6] lg:col-span-5 lg:row-span-2 lg:aspect-auto">
             <Reveal className="h-full">
               <Link to={`/portfolio?photo=${picks[0].id}`} className="group block h-full rounded-[1.35rem]" aria-label={`مشاهده تصویر: ${picks[0].title}`}>
-                <PortfolioTile item={picks[0]} ratio="4 / 4.8" className="h-full" />
+                <PortfolioTile item={picks[0]} fill className="h-full" />
               </Link>
             </Reveal>
           </li>
           {picks.slice(1).map((item, index) => (
-            <li key={item.id} className={index === 0 || index === 3 ? "lg:col-span-4" : "lg:col-span-3"}>
+            <li key={item.id} className={cn("aspect-[4/4.3] lg:aspect-auto", index === 0 || index === 3 ? "lg:col-span-4" : "lg:col-span-3")}>
               <Reveal delay={(index + 1) * 80} className="h-full">
                 <Link to={`/portfolio?photo=${item.id}`} className="group block h-full rounded-[1.35rem]" aria-label={`مشاهده تصویر: ${item.title}`}>
-                  <PortfolioTile item={item} ratio="4 / 4.2" className="h-full" />
+                  <PortfolioTile item={item} fill className="h-full" />
                 </Link>
               </Reveal>
             </li>

@@ -97,7 +97,19 @@ export function Reveal({ children, delay = 0, className }) {
  * Responsive photo with a reserved aspect box (no layout shift) and a soft fade
  * once decoded. Pass a Pexels `id` or a full `src`.
  */
-export function Photo({ id, src, alt, ratio = "4 / 5", sizes = "(min-width: 1024px) 33vw, 90vw", priority = false, className, imgClassName, width, height }) {
+export function Photo({
+  id,
+  src,
+  alt,
+  ratio = "4 / 5",
+  fill = false,
+  sizes = "(min-width: 1024px) 33vw, 90vw",
+  priority = false,
+  className,
+  imgClassName,
+  width,
+  height,
+}) {
   const [loaded, setLoaded] = useState(false);
   const ref = (node) => {
     if (node?.complete && node.naturalWidth > 0) setLoaded(true);
@@ -106,8 +118,17 @@ export function Photo({ id, src, alt, ratio = "4 / 5", sizes = "(min-width: 1024
   const url = id ? (w) => pexelsUrl(id, w) : null;
   const finalSrc = id ? url(800) : src;
   const srcSet = id ? widths.map((w) => `${url(w)} ${w}w`).join(", ") : undefined;
+  // `fill` makes the frame absolutely cover its (relative) parent, so the photo always
+  // reaches every edge of the card/tile regardless of how the box was stretched.
   return (
-    <div className={cn("relative overflow-hidden bg-ivory-200", className)} style={{ aspectRatio: ratio }}>
+    <div
+      className={cn(
+        "overflow-hidden bg-ivory-200",
+        fill ? "absolute inset-0" : "relative",
+        className,
+      )}
+      style={fill || ratio == null ? undefined : { aspectRatio: ratio }}
+    >
       <img
         ref={ref}
         src={finalSrc}
