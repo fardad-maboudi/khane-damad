@@ -14,6 +14,11 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './site/src'),
+      // @joorchin/client-sdk imports js-tiktoken without declaring it. The real
+      // package carries ~22 MB of rank tables and the site never tokenizes
+      // prompts, so both specifiers resolve to a loud stub instead.
+      'js-tiktoken/lite': path.resolve(__dirname, './site/src/lib/vendor/js-tiktoken-lite.js'),
+      'js-tiktoken/ranks/o200k_base': path.resolve(__dirname, './site/src/lib/vendor/js-tiktoken-ranks.js'),
     },
     extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
   },
