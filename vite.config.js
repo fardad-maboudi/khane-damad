@@ -8,6 +8,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   plugins: [react()],
   root: path.resolve(__dirname, './site'),
+  // .env files live at the repo root, next to package.json (Vite's root is ./site).
+  envDir: __dirname,
   css: {
     postcss: path.resolve(__dirname, './postcss.config.js'),
   },

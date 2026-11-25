@@ -80,3 +80,18 @@ export function statusOf(error) {
   const status = Number(error?.status ?? error?.response?.status ?? 0);
   return Number.isFinite(status) ? status : 0;
 }
+
+/** Network failures and gateway errors mean "no backend", not "wrong request". */
+export function isUnreachable(error) {
+  const status = statusOf(error);
+  return status === 0 || status === 502 || status === 503 || status === 504;
+}
+
+/** A signed-in session exists (access token persisted by the SDK). */
+export function hasSession() {
+  try {
+    return Boolean(localStorage.getItem(`joorchin_token_${APP_ID}`));
+  } catch {
+    return false;
+  }
+}

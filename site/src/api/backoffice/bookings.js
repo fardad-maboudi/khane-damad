@@ -1,4 +1,6 @@
 // Standalone stub for backoffice bookings API with interactive demo state
+import { getBackend, isUnreachable } from "@/api/joorchin.js";
+
 const DEMO_KEY = "khane-demo-bookings";
 const DEMO_CLIENTS_KEY = "khane-demo-clients";
 
@@ -133,7 +135,7 @@ function normalizeDemoRow(b) {
   };
 }
 
-export const getCalendar = async ({ from, to, resourceId } = {}) => {
+const demoCalendar = async ({ from, to, resourceId } = {}) => {
   const all = getSeededDemoBookings().map(normalizeDemoRow);
   const fromMs = from ? new Date(from).getTime() : 0;
   const toMs = to ? new Date(to).getTime() : Infinity;
@@ -146,13 +148,13 @@ export const getCalendar = async ({ from, to, resourceId } = {}) => {
   return { bookings, slots: [] };
 };
 
-export const confirmBooking = async (id) => {
+const demoConfirmBooking = async (id) => {
   const list = getSeededDemoBookings().map((b) => (String(b.id) === String(id) ? { ...b, status: "confirmed" } : b));
   saveDemoBookings(list);
   return { ok: true };
 };
 
-export const completeBooking = async (id) => {
+const demoCompleteBooking = async (id) => {
   const all = getSeededDemoBookings();
   const target = all.find((b) => String(b.id) === String(id));
   if (target) bumpDemoClient(target.customerPhone, "visitCount");
@@ -160,7 +162,7 @@ export const completeBooking = async (id) => {
   return { ok: true };
 };
 
-export const noShowBooking = async (id) => {
+const demoNoShowBooking = async (id) => {
   const all = getSeededDemoBookings();
   const target = all.find((b) => String(b.id) === String(id));
   if (target) bumpDemoClient(target.customerPhone, "noShowCount");
@@ -168,13 +170,13 @@ export const noShowBooking = async (id) => {
   return { ok: true };
 };
 
-export const cancelBooking = async (id) => {
+const demoCancelBooking = async (id) => {
   const list = getSeededDemoBookings().map((b) => (String(b.id) === String(id) ? { ...b, status: "cancelled" } : b));
   saveDemoBookings(list);
   return { ok: true };
 };
 
-export const rescheduleBooking = async (id, { newSlotId } = {}) => {
+const demoRescheduleBooking = async (id, { newSlotId } = {}) => {
   const parts = String(newSlotId || "").split("|");
   const newStart = parts.length === 4 ? Number(parts[3]) : null;
   const list = getSeededDemoBookings().map((b) => {
@@ -194,6 +196,85 @@ export const rescheduleBooking = async (id, { newSlotId } = {}) => {
   return { ok: true };
 };
 
-export const createService = async () => ({ ok: true });
-export const generateSlots = async () => ({ ok: true, count: 0 });
-export const updateService = async () => ({ ok: true });
+/* ------------------------------------------------------------------------- */
+/* SDK transport                                                              */
+/* ------------------------------------------------------------------------- */
+
+/**
+ * Staff calls use the signed-in staff token through `client.backoffice`.
+ * Demo rows stay the fallback only when no backend is configured or it cannot be
+ * reached; a 401/403 is rethrown so the page can ask for a sign-in instead of
+ * showing invented appointments.
+ */
+async function staffCall(run, fallback) {
+  const client = await getBackend();
+  if (!client) return fallback();
+  try {
+    return await run(client);
+  } catch (error) {
+    if (isUnreachable(error)) return fallback();
+    throw error;
+  }
+}
+
+export const getCalendar = ({ from, to, resourceId } = {}) =>
+  staffCall(
+    (client) => client.bookings.getCalendar({ from, to, resourceId }),
+    () => demoCalendar({ from, to, resourceId }),
+  );
+
+export const confirmBooking = (id) =>
+  staffCall(
+    (client) => client.bookings.confirmBooking(id),
+    () => demoConfirmBooking(id),
+  );
+
+export const completeBooking = (id) =>
+  staffCall(
+    (client) => client.bookings.completeBooking(id),
+    () => demoCompleteBooking(id),
+  );
+
+export const noShowBooking = (id) =>
+  staffCall(
+    (client) => client.bookings.noShowBooking(id),
+    () => demoNoShowBooking(id),
+  );
+
+export const cancelBooking = (id, input) => {
+  const payload = typeof input === "string" ? { reason: input } : (input ?? {});
+  return staffCall(
+    (client) => client.bookings.cancelBooking(id, payload),
+    () => demoCancelBooking(id),
+  );
+};
+
+export const rescheduleBooking = (id, input = {}) =>
+  staffCall(
+    (client) => client.bookings.rescheduleBooking(id, input),
+    () => demoRescheduleBooking(id, input),
+  );
+
+/*
+ * Services go through the raw plugin action instead of `client.bookings.createService`
+ * on purpose: that wrapper Zod-parses the body and `$strip`s every field it does not
+ * know, which would silently drop the seed pack's embedded `package` block (the paid
+ * multi-session offer). The route is the same one the wrapper posts to.
+ */
+export const createService = (body) =>
+  staffCall(
+    (client) => client.backoffice.plugin("bookings").action("services", { method: "POST", body }),
+    () => ({ ok: true }),
+  );
+
+export const updateService = (id, body) =>
+  staffCall(
+    (client) => client.backoffice.plugin("bookings").action(`services/${encodeURIComponent(id)}`, { method: "PUT", body }),
+    () => ({ ok: true }),
+  );
+
+export const generateSlots = (input) =>
+  staffCall(
+    (client) => client.bookings.generateSlots(input),
+    () => ({ ok: true, count: 0 }),
+  );

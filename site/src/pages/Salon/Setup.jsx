@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container, EmptyState, Spinner } from "@/components/salon/ui.jsx";
 import { PageHero } from "@/components/salon/sections.jsx";
-import { getMyMembership } from "@/api/backoffice/team";
+import { canManageBookings, getMyMembership } from "@/api/backoffice/team";
 import { applySeedPack } from "@/lib/seed-apply.js";
 import { useCatalog } from "@/lib/salon-api.js";
 import { toFa } from "@/lib/fa.js";
@@ -13,8 +13,7 @@ export default function Setup() {
   const client = useQueryClient();
   const catalog = useCatalog();
   const membership = useQuery({ queryKey: ["salon", "membership"], queryFn: getMyMembership, retry: false });
-  const member = membership.data?.membership || membership.data;
-  const canManage = Boolean(member?.capabilities?.includes("booking:manage"));
+  const canManage = canManageBookings(membership.data);
   const [progress, setProgress] = useState(null);
   const [state, setState] = useState("idle");
   const [error, setError] = useState(null);
@@ -27,7 +26,15 @@ export default function Setup() {
       await client.invalidateQueries({ queryKey: ["salon"] });
       setState("done");
     } catch (e) {
-      setError(e?.message || "راه‌اندازی کامل نشد؛ دوباره تلاش کنید.");
+      const status = Number(e?.status ?? 0);
+      if (status === 401 || status === 403) {
+        setError("دسترسی مدیریت منقضی شده است؛ دوباره وارد شوید.");
+        await membership.refetch();
+      } else if (status === 0) {
+        setError("اتصال به سرور برقرار نشد؛ شبکه یا دسترسی به API را بررسی کنید.");
+      } else {
+        setError(e?.message || "راه‌اندازی کامل نشد؛ دوباره تلاش کنید.");
+      }
       setState("idle");
     }
   }
@@ -47,7 +54,7 @@ export default function Setup() {
             <EmptyState
               title="برای راه‌اندازی وارد شوید"
               text="فقط صاحب سایت یا مدیر می‌تواند این کار را انجام دهد."
-              action={<Btn to="/admin/login" size="sm">ورود مدیر</Btn>}
+              action={<Btn to="/salon/login" size="sm">ورود مدیر</Btn>}
             />
           ) : null}
           {canManage ? (

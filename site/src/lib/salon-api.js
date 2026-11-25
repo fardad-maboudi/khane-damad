@@ -138,9 +138,17 @@ export async function loadCatalog() {
     const [serviceRows, barberRows] = await Promise.all([listServices(), listResources()]);
     const services = [...serviceRows].map(normalizeService).sort((a, b) => a.sortOrder - b.sortOrder);
     const barbers = [...barberRows].map(normalizeBarber).sort((a, b) => a.sortOrder - b.sortOrder);
+    // A live shop always has at least one service and one chair: an empty response
+    // means the app has not been seeded yet, so keep the showcase browsable until
+    // /salon/setup fills it. Everything else (prices, names) is taken as served.
+    if (!services.length && !barbers.length) return { ...demoCatalog(), unseeded: true };
     return { services, barbers, demo: false };
   } catch (error) {
-    if (isUnreachable(error)) return demoCatalog();
+    // Unreachable covers network/502-504. 401/403/404 mean the app keeps its
+    // catalogue away from visitors (or the route is not enabled yet), which for a
+    // public marketing page is the same practical situation: show the demo salon
+    // instead of an error page.
+    if (isUnreachable(error) || [401, 403, 404].includes(Number(error?.status ?? 0))) return demoCatalog();
     throw error;
   }
 }

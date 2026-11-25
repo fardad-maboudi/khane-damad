@@ -5,7 +5,7 @@ import { CalendarClock, Check, Clock, MessageCircle, MessageSquareText, Phone, S
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container, EmptyState, ErrorState, Spinner, useDialogFocusTrap } from "@/components/salon/ui.jsx";
 import { PageHero } from "@/components/salon/sections.jsx";
-import { getMyMembership } from "@/api/backoffice/team";
+import { canManageBookings, getMyMembership } from "@/api/backoffice/team";
 import { cancelBooking, completeBooking, confirmBooking, getCalendar, noShowBooking, rescheduleBooking } from "@/api/backoffice/bookings";
 import { loadDayTimes, useCatalog } from "@/lib/salon-api.js";
 import { discountedPrice, loyaltyState, reminderLinks, reminderText } from "@/lib/salon-helpers.js";
@@ -264,8 +264,7 @@ export default function Appointments() {
   const [flash, setFlash] = useState(null);
 
   const membership = useQuery({ queryKey: ["salon", "membership"], queryFn: getMyMembership, retry: false });
-  const member = membership.data?.membership || membership.data;
-  const canManage = Boolean(member?.capabilities?.includes("booking:manage"));
+  const canManage = canManageBookings(membership.data);
   const range = rangeFor(dayFilter, customDay);
   const calendar = useQuery({
     queryKey: ["salon", "admin-calendar", range.from, range.to, barber],
@@ -364,7 +363,7 @@ export default function Appointments() {
           <EmptyState
             title={membership.isError ? "برای مدیریت نوبت‌ها وارد شوید" : "دسترسی لازم را ندارید"}
             text={membership.isError ? "این بخش فقط برای صاحب سایت و اعضای تیم است." : "برای مدیریت نوبت‌ها به دسترسی مدیریت رزرو نیاز دارید."}
-            action={<Btn to="/admin/login" size="sm">ورود مدیر</Btn>}
+            action={<Btn to="/salon/login" size="sm">ورود مدیر</Btn>}
           />
         ) : null}
         {canManage ? (
