@@ -289,13 +289,17 @@ p {
 }
 
 /* Image reveal: the frame opens from the bottom, then the photo settles from 1.06 → 1.
-   One entrance per container — the animation lives on the frame, the image rides along. */
+   The curtain lives on an inner element, never on the observed one: a fully clipped box
+   can be reported as non-intersecting (WebKit), which would leave the photo invisible forever. */
 .reveal-image {
+  overflow: hidden;
+}
+.reveal-clip {
   clip-path: inset(0 0 100% 0);
   transition: clip-path 900ms var(--ease-in-out);
   transition-delay: var(--reveal-delay, 0ms);
 }
-.reveal-image.is-in {
+.reveal-image.is-in .reveal-clip {
   clip-path: inset(0 0 0 0);
 }
 .reveal-image img {
@@ -345,7 +349,7 @@ p {
   animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
 .enter-clip {
-  clip-path: inset(0 0 100% 0);
+  /* the closed state lives in the keyframes only, so a skipped animation fails open */
   animation: enter-open 1000ms var(--ease-in-out) both;
   animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
@@ -561,8 +565,8 @@ p {
     transform: none;
     clip-path: none;
   }
-  .reveal-image,
-  .reveal-image.is-in {
+  .reveal-clip,
+  .reveal-image.is-in .reveal-clip {
     clip-path: none;
   }
   .reveal-image img,

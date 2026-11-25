@@ -103,7 +103,7 @@ export function Reveal({ children, delay = 0, className, variant = "up", as: Tag
   const base = variant === "image" ? "reveal-image" : variant === "fade" ? "reveal-fade" : "reveal";
   return (
     <Tag ref={ref} className={cn(base, shown && "is-in", className)} style={{ "--reveal-delay": `${delay}ms` }} {...rest}>
-      {children}
+      {variant === "image" ? <div className="reveal-clip h-full">{children}</div> : children}
     </Tag>
   );
 }
@@ -126,13 +126,16 @@ export function Photo({
   height,
 }) {
   const [loaded, setLoaded] = useState(false);
+  // 0 = srcset, 1 = retry with one plain URL, 2 = give up and show the studio plate.
+  const [attempt, setAttempt] = useState(0);
+  const failed = attempt > 1;
   const ref = (node) => {
     if (node?.complete && node.naturalWidth > 0) setLoaded(true);
   };
   const widths = [480, 800, 1200];
   const url = id ? (w) => pexelsUrl(id, w) : null;
   const finalSrc = id ? url(800) : src;
-  const srcSet = id ? widths.map((w) => `${url(w)} ${w}w`).join(", ") : undefined;
+  const srcSet = id && attempt === 0 ? widths.map((w) => `${url(w)} ${w}w`).join(", ") : undefined;
   // `fill` makes the frame absolutely cover its (relative) parent, so the photo always
   // reaches every edge of the card/tile regardless of how the box was stretched.
   return (
@@ -144,21 +147,37 @@ export function Photo({
       )}
       style={fill || ratio == null ? undefined : { aspectRatio: ratio }}
     >
-      <img
-        ref={ref}
-        src={finalSrc}
-        srcSet={srcSet}
-        sizes={srcSet ? sizes : undefined}
-        alt={alt ?? ""}
-        width={width}
-        height={height}
-        loading={priority ? "eager" : "lazy"}
-        fetchpriority={priority ? "high" : "auto"}
-        decoding="async"
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
-        className={cn("img-fade absolute inset-0 h-full w-full object-cover", loaded && "is-loaded", imgClassName)}
-      />
+      {failed ? (
+        /* A dead photo URL must never leave a broken-image icon in a designed frame. */
+        <div
+          role="img"
+          aria-label={alt ?? ""}
+          className="absolute inset-0 grid place-items-center bg-forest-900 text-center"
+        >
+          <span aria-hidden className="px-6 font-[var(--font-display)] text-2xl leading-relaxed text-brass-300/85">
+            خانه داماد
+          </span>
+        </div>
+      ) : (
+        <img
+          ref={ref}
+          src={finalSrc}
+          srcSet={srcSet}
+          sizes={srcSet ? sizes : undefined}
+          alt={alt ?? ""}
+          width={width}
+          height={height}
+          loading={priority ? "eager" : "lazy"}
+          fetchpriority={priority ? "high" : "auto"}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(true);
+            setAttempt((n) => n + 1);
+          }}
+          className={cn("img-fade absolute inset-0 h-full w-full object-cover", loaded && "is-loaded", imgClassName)}
+        />
+      )}
     </div>
   );
 }

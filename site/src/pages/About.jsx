@@ -44,13 +44,16 @@ export default function About() {
           <div aria-hidden className="pointer-events-none absolute -inset-3 rounded-[2rem] border border-brass-400/40" />
           <Reveal variant="image" delay={100} className="overflow-hidden rounded-[1.6rem] shadow-[0_24px_50px_-24px_rgb(15_32_25/0.45)]">
             <Photo
-              id={portfolio[6].id}
-              alt={portfolio[6].alt}
-              ratio="4 / 3.5"
+              id={portfolio[15].id}
+              alt={portfolio[15].alt}
+              ratio="4 / 4.2"
               className="rounded-[1.6rem]"
               sizes="(min-width:1024px) 45vw, 92vw"
             />
           </Reveal>
+          <p className="mt-5 text-center text-xs font-semibold tracking-wide text-neutral-500">
+            صندلی و آینه‌ای که همه‌چیز از آن شروع شد
+          </p>
         </div>
       </Container>
 
