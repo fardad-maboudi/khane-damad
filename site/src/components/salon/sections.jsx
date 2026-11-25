@@ -11,7 +11,7 @@ export function ServiceCard({ service, className, large = false, wide = false })
   return (
     <article
       className={cn(
-        "group relative flex overflow-hidden rounded-[1.5rem] border border-ivory-300 bg-ivory-50 transition-[box-shadow,transform,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-brass-400 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.45)]",
+        "lift group relative flex overflow-hidden rounded-[1.5rem] border border-ivory-300 bg-ivory-50 hover:border-brass-400 hover:shadow-[0_26px_50px_-26px_rgb(15_32_25/0.45)]",
         wide ? "flex-col sm:flex-row" : "flex-col",
         className,
       )}
@@ -138,7 +138,7 @@ export function ReviewCard({ review, featured = false }) {
   return (
     <figure
       className={cn(
-        "flex h-full flex-col rounded-[1.5rem] border p-6 sm:p-7 transition-colors",
+        "lift flex h-full flex-col rounded-[1.5rem] border p-6 sm:p-7 transition-colors hover:shadow-[0_26px_50px_-30px_rgb(15_32_25/0.35)]",
         featured
           ? "forest-canvas border-brass-500/30 text-ivory-50 shadow-[0_24px_48px_-24px_rgb(15_32_25/0.6)]"
           : "border-ivory-300 bg-ivory-50 hover:border-brass-400/70",
@@ -148,7 +148,7 @@ export function ReviewCard({ review, featured = false }) {
         <Quote className={cn("size-7", featured ? "text-brass-400" : "text-brass-500")} aria-hidden />
         <Stars value={review.rating} size={15} />
       </div>
-      <blockquote className={cn("mt-4 flex-1 text-[0.95rem] leading-8", featured ? "text-ivory-100" : "text-charcoal-800")}>
+      <blockquote className={cn("mt-4 flex-1 leading-8", featured ? "text-base text-ivory-100 sm:text-[1.05rem] sm:leading-9" : "text-[0.95rem] text-charcoal-800")}>
         «{review.text}»
       </blockquote>
       <figcaption className={cn("mt-6 flex items-center justify-between gap-3 border-t pt-4", featured ? "border-ivory-50/15" : "border-ivory-200")}>
@@ -183,7 +183,7 @@ export function HoursTable({ className, light = false }) {
       <caption className="sr-only">ساعت کاری خانه داماد</caption>
       <tbody>
         {hours.map((row) => (
-          <tr key={row.day} className={cn("border-b last:border-0", light ? "border-ivory-50/12" : "border-ivory-200")}>
+          <tr key={row.day} className={cn("border-b last:border-0", light ? "border-ivory-50/[0.12]" : "border-ivory-200")}>
             <th scope="row" className="py-3 text-start font-semibold">{row.day}</th>
             <td className={cn("py-3 text-end num font-medium", light ? "text-ivory-200" : row.note ? "text-brass-700" : "text-forest-900")}>
               {row.note ? row.note : <span>{row.open} تا {row.close}</span>}
@@ -299,7 +299,7 @@ export function PortfolioTile({ item, onOpen, ratio, fill = false, className }) 
   );
 
   const sharedClasses = cn(
-    "img-zoom group relative block w-full overflow-hidden rounded-[1.35rem] border border-ivory-300/80 bg-ivory-200 text-start transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-1 hover:border-brass-400 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.5)]",
+    "img-zoom lift group relative block w-full overflow-hidden rounded-[1.35rem] border border-ivory-300/80 bg-ivory-200 text-start hover:border-brass-400 hover:shadow-[0_24px_48px_-24px_rgb(15_32_25/0.5)]",
     className,
   );
 
@@ -362,17 +362,19 @@ export function PageHero({ eyebrow = "خانه داماد · لاهیجان", ti
   return (
     <section className="forest-canvas relative overflow-hidden border-b border-brass-500/25 py-14 text-ivory-50 sm:py-20">
       <div aria-hidden className="pointer-events-none absolute -end-28 -top-24 size-96 rounded-full border border-brass-400/15" />
-      <div aria-hidden className="pointer-events-none absolute -end-16 -top-12 size-72 rounded-full border border-brass-400/10" />
       <Container className="relative">
-        <SectionHeading
-          as="h1"
-          size="xl"
-          tone="light"
-          eyebrow={eyebrow}
-          title={title}
-          lead={lead}
-          className="max-w-3xl"
-        />
+        <p className="enter inline-flex items-center gap-3 text-xs font-bold tracking-[0.18em] text-brass-300" style={{ "--i": 0 }}>
+          <span aria-hidden className="h-px w-8 bg-brass-400/70" />
+          {eyebrow}
+        </p>
+        <h1 className="enter mt-4 max-w-3xl text-3xl font-extrabold leading-[1.4] text-ivory-50 sm:text-5xl sm:leading-[1.34]" style={{ "--i": 1 }}>
+          {title}
+        </h1>
+        {lead ? (
+          <p className="enter mt-4 max-w-2xl text-base leading-8 text-ivory-200/90 sm:text-lg" style={{ "--i": 2 }}>
+            {lead}
+          </p>
+        ) : null}
         {children}
       </Container>
     </section>

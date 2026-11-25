@@ -1,7 +1,8 @@
 import { Clock, MapPin, Phone, Navigation } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container, Reveal } from "@/components/salon/ui.jsx";
-import { FinalCta, HoursTable, MapEmbed, PageHero, QuickContact } from "@/components/salon/sections.jsx";
+import { FinalCta, HoursTable, MapEmbed, QuickContact } from "@/components/salon/sections.jsx";
+import { ContactHero } from "@/components/salon/heroes.jsx";
 import { directionLinks } from "@/lib/salon-helpers.js";
 import { contact } from "@/content/salon.js";
 
@@ -9,14 +10,10 @@ export default function Contact() {
   return (
     <>
       <Seo title="تماس و آدرس" description={`آدرس خانه داماد: ${contact.address}. تلفن ${contact.phoneDisplay}، ساعت کاری و مسیریابی.`} />
-      <PageHero
-        eyebrow="راه‌های ارتباطی و مسیریابی"
-        title="میزبان شما در قلب لاهیجان هستیم"
-        lead="برای مشاوره پکیج داماد، هماهنگی نوبت یا تغییر زمان حضور، با ما در ارتباط باشید."
-      />
+      <ContactHero />
       <Container className="grid gap-8 py-14 sm:py-16 lg:grid-cols-[1fr_1.2fr]">
         <div className="space-y-6">
-          <Reveal className="rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 sm:p-7">
+          <Reveal className="lift rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 shadow-[0_18px_40px_-34px_rgb(15_32_25/0.5)] hover:border-brass-400/70 sm:p-7">
             <h2 className="flex items-center gap-2.5 text-lg font-extrabold text-forest-900">
               <MapPin className="size-5 text-brass-600" aria-hidden /> نشانی و راهنمای دسترسی
             </h2>
@@ -35,7 +32,7 @@ export default function Contact() {
             </div>
           </Reveal>
 
-          <Reveal delay={80} className="rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 sm:p-7">
+          <Reveal delay={80} className="lift rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 shadow-[0_18px_40px_-34px_rgb(15_32_25/0.5)] hover:border-brass-400/70 sm:p-7">
             <h2 className="flex items-center gap-2.5 text-lg font-extrabold text-forest-900">
               <Phone className="size-5 text-brass-600" aria-hidden /> تماس مستقیم
             </h2>
@@ -56,14 +53,14 @@ export default function Contact() {
             <QuickContact className="mt-5 pt-2" size="sm" />
           </Reveal>
 
-          <Reveal delay={160} className="rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 sm:p-7">
+          <Reveal delay={160} className="lift rounded-[1.5rem] border border-ivory-300 bg-ivory-50 p-6 shadow-[0_18px_40px_-34px_rgb(15_32_25/0.5)] hover:border-brass-400/70 sm:p-7">
             <h2 className="flex items-center gap-2.5 text-lg font-extrabold text-forest-900">
               <Clock className="size-5 text-brass-600" aria-hidden /> ساعت کاری هفتگی
             </h2>
             <HoursTable className="mt-3" />
           </Reveal>
         </div>
-        <Reveal>
+        <Reveal variant="fade" className="overflow-hidden rounded-[1.5rem] border border-ivory-300 shadow-[0_24px_60px_-40px_rgb(15_32_25/0.55)]">
           <MapEmbed className="h-full min-h-[28rem]" />
         </Reveal>
       </Container>

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { ChevronDown, MessageCircleQuestion } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
-import { Btn, Container } from "@/components/salon/ui.jsx";
-import { FinalCta, PageHero } from "@/components/salon/sections.jsx";
+import { Btn, Container, Reveal } from "@/components/salon/ui.jsx";
+import { FinalCta } from "@/components/salon/sections.jsx";
+import { FaqHero } from "@/components/salon/heroes.jsx";
 import { faq } from "@/content/salon.js";
 import { cn } from "@/lib/utils";
 
@@ -29,14 +30,10 @@ export default function Faq() {
           }),
         }}
       />
-      <PageHero
-        eyebrow="راهنمای مراجعان"
-        title="پاسخ پرسش‌های متداول"
-        lead="همه آنچه پیش از رزرو نوبت، تغییر زمان حضور یا انتخاب پکیج داماد خوب است بدانید."
-      />
+      <FaqHero groups={groups} />
       <Container className="max-w-3xl py-14 sm:py-16">
-        {groups.map((g) => (
-          <section key={g} className="mb-10" aria-label={g}>
+        {groups.map((g, gi) => (
+          <Reveal as="section" key={g} delay={gi * 60} id={`faq-${g}`} className="mb-10 scroll-mt-24" aria-label={g}>
             <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-forest-900">
               <span aria-hidden className="size-2 rotate-45 bg-brass-500" />
               {g}
@@ -52,7 +49,7 @@ export default function Faq() {
                         aria-controls={`faq-${i}`}
                         id={`faq-b-${i}`}
                         onClick={() => setOpen(open === i ? -1 : i)}
-                        className="flex w-full items-center justify-between gap-4 p-5 sm:px-6 text-start font-bold text-forest-900 hover:text-forest-700"
+                        className="flex w-full items-center justify-between gap-4 p-5 text-start font-bold text-forest-900 transition-colors duration-200 hover:bg-ivory-100/60 hover:text-forest-700 sm:px-6"
                       >
                         <span>{f.q}</span>
                         <span className={cn("grid size-8 shrink-0 place-items-center rounded-full border transition-colors", open === i ? "border-brass-500 bg-brass-200/60 text-forest-900" : "border-ivory-300 text-brass-600")}>
@@ -75,7 +72,7 @@ export default function Faq() {
                 ),
               )}
             </div>
-          </section>
+          </Reveal>
         ))}
 
         <div className="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-[1.5rem] border border-brass-400/50 bg-ivory-50 p-6">

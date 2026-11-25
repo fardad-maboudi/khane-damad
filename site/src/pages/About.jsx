@@ -1,7 +1,8 @@
 import Seo from "@/components/salon/Seo.jsx";
 import { Container, Photo, Reveal, SectionHeading, Spinner } from "@/components/salon/ui.jsx";
-import { BarberCard, FinalCta, PageHero } from "@/components/salon/sections.jsx";
-import { about, pexelsUrl } from "@/content/salon.js";
+import { BarberCard, FinalCta } from "@/components/salon/sections.jsx";
+import { AboutHero } from "@/components/salon/heroes.jsx";
+import { about, pexelsUrl, portfolio } from "@/content/salon.js";
 import { useCatalog } from "@/lib/salon-api.js";
 import { toFa } from "@/lib/fa.js";
 
@@ -14,11 +15,7 @@ export default function About() {
         description="با استودیو خانه داماد و آرایشگرهای متخصص آن در لاهیجان آشنا شوید؛ هر آرایشگر با عکس، معرفی، تخصص و امکان رزرو مستقیم."
         image={pexelsUrl(about.image.id, 1200)}
       />
-      <PageHero
-        eyebrow="داستان و فلسفه استودیو"
-        title={about.title}
-        lead="آرامش یک آرایشگاه اصیل مردانه در کنار استانداردهای روز گرومینگ و نوبت‌دهی دقیق آنلاین در لاهیجان."
-      />
+      <AboutHero />
 
       <Container className="grid items-center gap-12 py-16 sm:py-20 lg:grid-cols-[1.08fr_0.92fr] lg:gap-16">
         <Reveal className="space-y-6">
@@ -43,16 +40,18 @@ export default function About() {
             </div>
           </dl>
         </Reveal>
-        <Reveal delay={100} className="relative">
+        <div className="relative">
           <div aria-hidden className="pointer-events-none absolute -inset-3 rounded-[2rem] border border-brass-400/40" />
-          <Photo
-            id={about.image.id}
-            alt={about.image.alt}
-            ratio="4 / 3.5"
-            className="rounded-[1.6rem] shadow-[0_24px_50px_-24px_rgb(15_32_25/0.45)]"
-            sizes="(min-width:1024px) 45vw, 92vw"
-          />
-        </Reveal>
+          <Reveal variant="image" delay={100} className="overflow-hidden rounded-[1.6rem] shadow-[0_24px_50px_-24px_rgb(15_32_25/0.45)]">
+            <Photo
+              id={portfolio[6].id}
+              alt={portfolio[6].alt}
+              ratio="4 / 3.5"
+              className="rounded-[1.6rem]"
+              sizes="(min-width:1024px) 45vw, 92vw"
+            />
+          </Reveal>
+        </div>
       </Container>
 
       <section className="border-y border-ivory-300/80 bg-ivory-50 py-16 sm:py-20" aria-labelledby="approach">
@@ -77,7 +76,7 @@ export default function About() {
         </Container>
       </section>
 
-      <section className="py-16 sm:py-20" aria-labelledby="team-h">
+      <section id="team" className="scroll-mt-24 py-16 sm:py-20" aria-labelledby="team-h">
         <Container>
           <SectionHeading
             eyebrow="اعضای تیم"

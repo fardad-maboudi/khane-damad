@@ -4,8 +4,12 @@ import { Star, AlertTriangle, Loader2, MessageCircle, Send } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { pexelsUrl } from "@/content/salon.js";
 
-export function Container({ className, children }) {
-  return <div className={cn("mx-auto w-full max-w-7xl px-5 sm:px-8", className)}>{children}</div>;
+export function Container({ className, children, ...rest }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-7xl px-5 sm:px-8", className)} {...rest}>
+      {children}
+    </div>
+  );
 }
 
 /**
@@ -65,8 +69,18 @@ export function useDialogFocusTrap(active, containerRef, onClose) {
   }, [active, containerRef, onClose]);
 }
 
-/** Fades/slides a block in once, when it first enters the viewport. */
-export function Reveal({ children, delay = 0, className }) {
+/**
+ * Reveals a block once it first enters the viewport.
+ *
+ * `variant`:
+ *  - "up"    text and blocks; slides 14px and fades (default)
+ *  - "fade"  decoration only; never travels
+ *  - "image" media frames; the frame opens from the bottom and the photo settles
+ *
+ * Motion lives on one element per container — never a container entrance plus a
+ * stagger of its children. Reduced motion keeps the fade and drops the movement.
+ */
+export function Reveal({ children, delay = 0, className, variant = "up", as: Tag = "div", ...rest }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(
     () => typeof IntersectionObserver === "undefined" || (typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)),
@@ -81,15 +95,16 @@ export function Reveal({ children, delay = 0, className }) {
           observer.disconnect();
         }
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, [shown]);
+  const base = variant === "image" ? "reveal-image" : variant === "fade" ? "reveal-fade" : "reveal";
   return (
-    <div ref={ref} className={cn("reveal", shown && "is-in", className)} style={{ "--reveal-delay": `${delay}ms` }}>
+    <Tag ref={ref} className={cn(base, shown && "is-in", className)} style={{ "--reveal-delay": `${delay}ms` }} {...rest}>
       {children}
-    </div>
+    </Tag>
   );
 }
 
@@ -157,7 +172,7 @@ const BTN_VARIANT = {
   outline: "border border-forest-700/35 bg-ivory-50/50 text-forest-900 hover:bg-forest-800 hover:text-ivory-50 hover:border-forest-800",
   ghost: "text-forest-800 hover:bg-forest-700/10",
   light: "bg-ivory-50 text-forest-900 hover:bg-ivory-100",
-  outlineLight: "border border-ivory-50/35 text-ivory-50 hover:bg-ivory-50/12 hover:border-brass-300",
+  outlineLight: "border border-ivory-50/35 text-ivory-50 hover:bg-ivory-50/[0.12] hover:border-brass-300",
   danger: "bg-danger-600 text-ivory-50 hover:bg-danger-800",
 };
 

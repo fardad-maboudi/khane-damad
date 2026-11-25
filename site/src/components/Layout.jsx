@@ -70,7 +70,7 @@ function Header() {
       className={cn(
         "sticky top-0 z-40 transition-[background-color,box-shadow,backdrop-filter,border-color] duration-300",
         scrolled
-          ? "border-b border-ivory-300/90 bg-ivory-100/92 shadow-[0_12px_32px_-20px_rgb(15_32_25/0.35)] backdrop-blur-md"
+          ? "border-b border-ivory-300/90 bg-ivory-100/[0.92] shadow-[0_12px_32px_-20px_rgb(15_32_25/0.35)] backdrop-blur-md"
           : "border-b border-ivory-300/40 bg-ivory-100/80 backdrop-blur-sm",
       )}
     >
@@ -87,9 +87,9 @@ function Header() {
                   end={item.to === "/"}
                   className={({ isActive }) =>
                     cn(
-                      "relative rounded-full px-3 py-2 text-[0.9rem] font-semibold transition-colors xl:px-3.5",
+                      "nav-link relative rounded-full px-3 py-2 text-[0.9rem] font-semibold transition-colors xl:px-3.5",
                       isActive
-                        ? "bg-forest-900/6 text-forest-900 after:absolute after:inset-x-3.5 after:bottom-1 after:h-0.5 after:rounded-full after:bg-brass-500"
+                        ? "bg-forest-900/[0.06] text-forest-900 after:absolute after:inset-x-3.5 after:bottom-1 after:h-0.5 after:rounded-full after:bg-brass-500"
                         : "text-neutral-700 hover:bg-ivory-200/70 hover:text-forest-900",
                     )
                   }

@@ -4,7 +4,8 @@ import { useSearchParams } from "react-router-dom";
 import { ChevronLeft, ChevronRight, X, ArrowLeft } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container, useDialogFocusTrap } from "@/components/salon/ui.jsx";
-import { FinalCta, PageHero, PortfolioTile } from "@/components/salon/sections.jsx";
+import { FinalCta, PortfolioTile } from "@/components/salon/sections.jsx";
+import { PortfolioHero } from "@/components/salon/heroes.jsx";
 import { pexelsUrl, portfolio, portfolioCategories } from "@/content/salon.js";
 import { toFa } from "@/lib/fa.js";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ function Viewer({ items, activeId, onClose, onSelectId }) {
       role="dialog"
       aria-modal="true"
       aria-label={item.title}
-      className="fixed inset-0 z-50 flex flex-col bg-forest-950/95 text-ivory-50 backdrop-blur-md page-enter"
+      className="lightbox-enter fixed inset-0 z-50 flex flex-col bg-forest-950/[0.96] text-ivory-50 backdrop-blur-md"
       onClick={onClose}
     >
       <div className="flex items-center justify-between border-b border-ivory-50/10 px-5 py-4" onClick={(e) => e.stopPropagation()}>
@@ -77,7 +78,7 @@ function Viewer({ items, activeId, onClose, onSelectId }) {
           key={item.id}
           src={pexelsUrl(item.id, 1200)}
           alt={item.alt}
-          className="img-fade is-loaded max-h-full max-w-full rounded-2xl border border-ivory-50/15 object-contain shadow-2xl"
+          className="lightbox-figure max-h-full max-w-full rounded-2xl border border-ivory-50/15 object-contain shadow-2xl"
           style={{ aspectRatio: `${item.width} / ${item.height}` }}
         />
         <button
@@ -172,12 +173,8 @@ export default function Portfolio() {
         description="گالری مدل مو، فرم ریش و تحول داماد در استودیو خانه داماد لاهیجان."
         image={pexelsUrl(portfolio[3].id, 1200)}
       />
-      <PageHero
-        eyebrow="آرشیو استودیو · نمونه‌کارها"
-        title="گالری کات، ریش و تشریفات داماد"
-        lead="با انتخاب دسته‌بندی مورد نظر، جزئیات هر استایل را ببینید و روی هر تصویر برای نمایش تمام‌صفحه بزنید."
-      >
-        <div role="group" aria-label="فیلتر دسته‌بندی" className="mt-8 flex flex-wrap gap-2.5">
+      <PortfolioHero count={portfolio.length}>
+        <div role="group" aria-label="فیلتر دسته‌بندی" className="flex flex-wrap gap-2.5">
           {portfolioCategories.map((c) => {
             const active = category === c.key;
             return (
@@ -187,18 +184,21 @@ export default function Portfolio() {
                 aria-pressed={active}
                 onClick={() => setCategory(c.key)}
                 className={cn(
-                  "btn-press rounded-full border px-5 py-2 text-sm font-bold transition-colors",
+                  "btn-press rounded-full border px-4 py-2 text-[0.8rem] font-bold transition-colors duration-200",
                   active
                     ? "border-brass-400 bg-brass-400 text-charcoal-900"
-                    : "border-ivory-50/25 bg-ivory-50/10 text-ivory-50 hover:border-brass-300 hover:bg-ivory-50/20",
+                    : "border-ivory-50/20 bg-ivory-50/5 text-ivory-100 hover:border-brass-300/70 hover:bg-ivory-50/10",
                 )}
               >
-                {c.label} <span className={cn("num ms-1 text-xs", active ? "text-charcoal-800" : "text-brass-300")}>({toFa(countsByCategory[c.key] ?? 0)})</span>
+                {c.label}
+                <span className={cn("num ms-1.5 text-[0.7rem]", active ? "text-charcoal-800/80" : "text-brass-300")}>
+                  {toFa(countsByCategory[c.key] ?? 0)}
+                </span>
               </button>
             );
           })}
         </div>
-      </PageHero>
+      </PortfolioHero>
 
       <Container className="py-14 sm:py-20">
         <div className="mx-auto max-w-6xl">

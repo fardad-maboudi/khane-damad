@@ -3,7 +3,8 @@ import { ArrowLeft, Clock, Sparkles } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container, Reveal, Spinner, ErrorState, SectionHeading } from "@/components/salon/ui.jsx";
 import PackageSection from "@/components/salon/PackageSection.jsx";
-import { CatalogEmpty, FinalCta, LoyaltyBand, PageHero, ServiceCard } from "@/components/salon/sections.jsx";
+import { CatalogEmpty, FinalCta, LoyaltyBand, ServiceCard } from "@/components/salon/sections.jsx";
+import { ServicesHero } from "@/components/salon/heroes.jsx";
 import { groupServices, useCatalog } from "@/lib/salon-api.js";
 import { formatDuration, formatPrice, toFa } from "@/lib/fa.js";
 
@@ -16,38 +17,25 @@ export default function Services() {
         title="خدمات و تعرفه"
         description="کات و فید، فرم‌دهی ریش، اصلاح با تیغ، مراقبت پوست و پکیج‌های داماد در خانه داماد لاهیجان؛ با مدت و قیمت شفاف و رزرو آنلاین."
       />
-      <PageHero
-        eyebrow="منوی تخصصی خدمات · لاهیجان"
-        title="خدماتی که دقیق، شفاف و بی‌واسطه قابل رزرو است"
-        lead="مدت‌زمان و تعرفه هر خدمت پیش روی شماست. هر خدمت را که انتخاب کنید، مستقیم وارد تقویم رزرو همان خدمت می‌شوید."
-      >
-        {groups.length ? (
-          <nav aria-label="دسته‌بندی خدمات" className="mt-8 flex flex-wrap gap-2.5">
-            {groups.map((g) => (
-              <a
-                key={g.name}
-                href={`#g-${g.name}`}
-                className="btn-press rounded-full border border-ivory-50/25 bg-ivory-50/10 px-4 py-2 text-sm font-semibold text-ivory-50 backdrop-blur-sm transition-colors hover:border-brass-300 hover:bg-ivory-50/20"
-              >
-                {g.name} <span className="num ms-1 text-brass-300">({toFa(g.items.length)})</span>
-              </a>
-            ))}
-          </nav>
-        ) : null}
-      </PageHero>
+      <ServicesHero groups={groups} />
 
-      <Container className="pt-14 pb-6 sm:pt-16 sm:pb-8">
+      <Container id="services-list" className="scroll-mt-24 pt-14 pb-6 sm:pt-16 sm:pb-8">
         {isLoading ? <Spinner label="در حال دریافت خدمات…" /> : null}
         {isError ? <ErrorState title="دریافت خدمات ممکن نشد" text="اتصال به سرور برقرار نشد." onRetry={() => refetch()} /> : null}
         {data && !groups.length ? <CatalogEmpty /> : null}
 
-        {groups.map((group) => (
+        {groups.map((group, gi) => (
           <section key={group.name} id={`g-${group.name}`} aria-labelledby={`h-${group.name}`} className="mb-16 scroll-mt-28">
-            <div className="mb-7 flex items-center justify-between gap-4 border-b border-ivory-300 pb-4">
-              <h2 id={`h-${group.name}`} className="flex items-center gap-2.5 text-2xl font-extrabold text-forest-900 sm:text-3xl">
-                <span aria-hidden className="size-2 rotate-45 bg-brass-500" />
-                {group.name}
-              </h2>
+            <div className="mb-7 flex items-end justify-between gap-4 border-b border-ivory-300 pb-4">
+              <div className="flex items-end gap-3">
+                <span aria-hidden className="num pb-1 text-xs font-bold tracking-[0.12em] text-brass-600">
+                  {toFa(String(gi + 1).padStart(2, "0"))}
+                </span>
+                <h2 id={`h-${group.name}`} className="flex items-center gap-2.5 text-2xl font-extrabold text-forest-900 sm:text-3xl">
+                  <span aria-hidden className="size-2 rotate-45 bg-brass-500" />
+                  {group.name}
+                </h2>
+              </div>
               <span className="num rounded-full bg-ivory-200 px-3 py-1 text-xs font-bold text-neutral-700">
                 {toFa(group.items.length)} خدمت
               </span>
