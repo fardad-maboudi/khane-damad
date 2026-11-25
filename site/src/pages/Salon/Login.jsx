@@ -5,7 +5,7 @@ import { ArrowLeft, LogOut, ShieldCheck } from "lucide-react";
 import Seo from "@/components/salon/Seo.jsx";
 import { Btn, Container } from "@/components/salon/ui.jsx";
 import { PageHero } from "@/components/salon/sections.jsx";
-import { hasBackend, statusOf } from "@/api/joorchin.js";
+import { API_HOST, APP_ID, hasBackend, statusOf } from "@/api/joorchin.js";
 import { isSignedIn, loginStaff, loginStaffWithPassword, requestStaffOtp, signOut } from "@/api/auth.js";
 import { toFa } from "@/lib/fa.js";
 
@@ -260,6 +260,9 @@ export default function StaffLogin() {
             </form>
             <p className="mt-5 text-xs leading-6 text-neutral-500">
               ورود مخصوص تیم استودیو است؛ ورود مراجعان از همین صفحه انجام نمی‌شود.
+            </p>
+            <p className="mt-3 text-[0.7rem] leading-6 text-neutral-400" dir="ltr">
+              {API_HOST} · app {APP_ID.slice(0, 8)}…
             </p>
           </div>
         )}

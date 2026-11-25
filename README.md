@@ -25,11 +25,14 @@ The visitor and staff surfaces talk to a Joorchin app through `@joorchin/client-
    `Failed to resolve import "@joorchin/client-sdk"`. Check with
    `npm ls @joorchin/client-sdk` (expect `0.3.2`).
 2. **Configure the app.** Copy `.env.example` to `.env.local` and set
-   `VITE_JOORCHIN_APP_ID` (leave `VITE_JOORCHIN_SERVER_URL` empty for
-   `https://api.joorchin.ai`). Without it the site runs entirely on its bundled
-   demo pack and never calls the network. Vite's root is `./site`, so
-   `vite.config.js` sets `envDir` to the repo root — keep env files next to
-   `package.json`.
+   `VITE_JOORCHIN_APP_ID`. Leave `VITE_JOORCHIN_SERVER_URL` empty for
+   `https://api.joorchin.ai`, or set `https://api.joorchin.site` when the app
+   lives on staging — one line per key, because the **last** duplicate wins.
+   `VITE_API_MODE=demo` keeps the bundled data even with an app id set. Without an
+   app id the site runs entirely on its demo pack and never calls the network.
+   Vite's root is `./site`, so `vite.config.js` sets `envDir` to the repo root —
+   keep env files next to `package.json`, and restart the dev server after edits.
+   The staff sign-in card prints the effective host and app id.
 3. **Seed an empty app from the browser**: sign in at `/salon/login` (staff phone
    OTP, or password if one is set), then press the seed button on `/salon/setup`.
    It writes settings, barbers, services, schedules, time off and generates 21 days
