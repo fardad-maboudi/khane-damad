@@ -1,13 +1,29 @@
 /**
- * Staff reads/writes of plugin rows through the back-office SDK transport, so the
+ * Staff reads/writes of plugin rows through the back-office transport, so the
  * signed-in staff token is used (the visitor seam sends the visitor session and
  * is refused for staff-only rows such as clients, schedules and time off).
+ *
+ * Every call maps onto `client.backoffice.plugin("bookings").records(entity)`,
+ * which is the same `/plugins/bookings/data/:entity` route the pages were written
+ * against — only the transport changed.
  */
-import { backofficeList, backofficeRequest } from "@/api/backoffice/client";
+import { getBackend } from "@/api/joorchin.js";
 
-const base = (entity) => `/plugins/bookings/data/${entity}`;
+async function staffPlugin() {
+  const client = await getBackend();
+  if (!client) throw Object.assign(new Error("Backend is not configured"), { status: 0 });
+  return client.backoffice.plugin("bookings");
+}
 
-export const staffList = (entity, query = { limit: 500 }) => backofficeList(base(entity), query);
-export const staffCreate = (entity, body) => backofficeRequest(base(entity), { method: "POST", body });
-export const staffUpdate = (entity, id, body) => backofficeRequest(`${base(entity)}/${id}`, { method: "PUT", body });
-export const staffSaveSettings = (body) => backofficeRequest("/plugins/bookings/settings", { method: "PUT", body });
+export const staffList = async (entity, query = { limit: 500 }) => (await staffPlugin()).records(entity).list(query);
+
+export const staffGet = async (entity, id) => (await staffPlugin()).records(entity).get(id);
+
+export const staffCreate = async (entity, body) => (await staffPlugin()).records(entity).create(body);
+
+export const staffUpdate = async (entity, id, body) => (await staffPlugin()).records(entity).update(id, body);
+
+export const staffRemove = async (entity, id) => (await staffPlugin()).records(entity).remove(id);
+
+export const staffSaveSettings = async (body) =>
+  (await staffPlugin()).action("settings", { method: "PUT", body });

@@ -4,12 +4,83 @@ import { Star, AlertTriangle, Loader2, MessageCircle, Send } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { pexelsUrl } from "@/content/salon.js";
 
-export function Container({ className, children }) {
-  return <div className={cn("mx-auto w-full max-w-7xl px-5 sm:px-8", className)}>{children}</div>;
+export function Container({ className, children, ...rest }) {
+  return (
+    <div className={cn("mx-auto w-full max-w-7xl px-5 sm:px-8", className)} {...rest}>
+      {children}
+    </div>
+  );
 }
 
-/** Fades/slides a block in once, when it first enters the viewport. */
-export function Reveal({ children, delay = 0, className }) {
+/**
+ * Reusable accessible focus trap + focus restoration hook for dialogs, lightboxes, and menus.
+ */
+export function useDialogFocusTrap(active, containerRef, onClose) {
+  useEffect(() => {
+    if (!active) return undefined;
+    const previouslyFocused = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const getFocusable = () => {
+      if (!containerRef.current) return [];
+      return [...containerRef.current.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')];
+    };
+
+    const focusTimer = window.setTimeout(() => {
+      const focusable = getFocusable();
+      if (focusable.length) focusable[0].focus();
+      else containerRef.current?.focus();
+    }, 10);
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose?.();
+        return;
+      }
+      if (event.key === "Tab") {
+        const focusable = getFocusable();
+        if (!focusable.length) {
+          event.preventDefault();
+          return;
+        }
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.clearTimeout(focusTimer);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+      if (previouslyFocused && typeof previouslyFocused.focus === "function") {
+        previouslyFocused.focus();
+      }
+    };
+  }, [active, containerRef, onClose]);
+}
+
+/**
+ * Reveals a block once it first enters the viewport.
+ *
+ * `variant`:
+ *  - "up"    text and blocks; slides 14px and fades (default)
+ *  - "fade"  decoration only; never travels
+ *  - "image" media frames; the frame opens from the bottom and the photo settles
+ *
+ * Motion lives on one element per container — never a container entrance plus a
+ * stagger of its children. Reduced motion keeps the fade and drops the movement.
+ */
+export function Reveal({ children, delay = 0, className, variant = "up", as: Tag = "div", ...rest }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(
     () => typeof IntersectionObserver === "undefined" || (typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches)),
@@ -24,15 +95,16 @@ export function Reveal({ children, delay = 0, className }) {
           observer.disconnect();
         }
       },
-      { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
+      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 },
     );
     observer.observe(node);
     return () => observer.disconnect();
   }, [shown]);
+  const base = variant === "image" ? "reveal-image" : variant === "fade" ? "reveal-fade" : "reveal";
   return (
-    <div ref={ref} className={cn("reveal", shown && "is-in", className)} style={{ "--reveal-delay": `${delay}ms` }}>
-      {children}
-    </div>
+    <Tag ref={ref} className={cn(base, shown && "is-in", className)} style={{ "--reveal-delay": `${delay}ms` }} {...rest}>
+      {variant === "image" ? <div className="reveal-clip h-full">{children}</div> : children}
+    </Tag>
   );
 }
 
@@ -40,47 +112,87 @@ export function Reveal({ children, delay = 0, className }) {
  * Responsive photo with a reserved aspect box (no layout shift) and a soft fade
  * once decoded. Pass a Pexels `id` or a full `src`.
  */
-export function Photo({ id, src, alt, ratio = "4 / 5", sizes = "(min-width: 1024px) 33vw, 90vw", priority = false, className, imgClassName, width, height }) {
+export function Photo({
+  id,
+  src,
+  alt,
+  ratio = "4 / 5",
+  fill = false,
+  sizes = "(min-width: 1024px) 33vw, 90vw",
+  priority = false,
+  className,
+  imgClassName,
+  width,
+  height,
+}) {
   const [loaded, setLoaded] = useState(false);
+  // 0 = srcset, 1 = retry with one plain URL, 2 = give up and show the studio plate.
+  const [attempt, setAttempt] = useState(0);
+  const failed = attempt > 1;
   const ref = (node) => {
     if (node?.complete && node.naturalWidth > 0) setLoaded(true);
   };
   const widths = [480, 800, 1200];
   const url = id ? (w) => pexelsUrl(id, w) : null;
   const finalSrc = id ? url(800) : src;
-  const srcSet = id ? widths.map((w) => `${url(w)} ${w}w`).join(", ") : undefined;
+  const srcSet = id && attempt === 0 ? widths.map((w) => `${url(w)} ${w}w`).join(", ") : undefined;
+  // `fill` makes the frame absolutely cover its (relative) parent, so the photo always
+  // reaches every edge of the card/tile regardless of how the box was stretched.
   return (
-    <div className={cn("relative overflow-hidden bg-ivory-200", className)} style={{ aspectRatio: ratio }}>
-      <img
-        ref={ref}
-        src={finalSrc}
-        srcSet={srcSet}
-        sizes={srcSet ? sizes : undefined}
-        alt={alt || ""}
-        width={width}
-        height={height}
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        decoding="async"
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(true)}
-        className={cn("img-fade absolute inset-0 h-full w-full object-cover", loaded && "is-loaded", imgClassName)}
-      />
+    <div
+      className={cn(
+        "overflow-hidden bg-ivory-200",
+        fill ? "absolute inset-0" : "relative",
+        className,
+      )}
+      style={fill || ratio == null ? undefined : { aspectRatio: ratio }}
+    >
+      {failed ? (
+        /* A dead photo URL must never leave a broken-image icon in a designed frame. */
+        <div
+          role="img"
+          aria-label={alt ?? ""}
+          className="absolute inset-0 grid place-items-center bg-forest-900 text-center"
+        >
+          <span aria-hidden className="px-6 font-[var(--font-display)] text-2xl leading-relaxed text-brass-300/85">
+            خانه داماد
+          </span>
+        </div>
+      ) : (
+        <img
+          ref={ref}
+          src={finalSrc}
+          srcSet={srcSet}
+          sizes={srcSet ? sizes : undefined}
+          alt={alt ?? ""}
+          width={width}
+          height={height}
+          loading={priority ? "eager" : "lazy"}
+          fetchpriority={priority ? "high" : "auto"}
+          decoding="async"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            setLoaded(true);
+            setAttempt((n) => n + 1);
+          }}
+          className={cn("img-fade absolute inset-0 h-full w-full object-cover", loaded && "is-loaded", imgClassName)}
+        />
+      )}
     </div>
   );
 }
 
 const BTN_BASE =
-  "btn-press inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap select-none disabled:cursor-not-allowed disabled:opacity-50";
+  "btn-press inline-flex items-center justify-center gap-2.5 rounded-full font-semibold whitespace-nowrap select-none disabled:cursor-not-allowed disabled:opacity-50";
 const BTN_SIZE = { md: "h-12 px-7 text-[0.95rem]", lg: "h-14 px-9 text-base", sm: "h-11 px-5 text-sm" };
 const BTN_VARIANT = {
-  primary: "btn-fill bg-forest-700 text-ivory-50 hover:text-charcoal-900 shadow-[0_8px_20px_-8px_rgb(15_32_25/0.6)]",
-  brass: "bg-brass-500 text-charcoal-900 hover:bg-brass-400",
-  outline: "border border-forest-700/40 text-forest-800 hover:bg-forest-700/8 hover:border-forest-700",
-  ghost: "text-forest-800 hover:bg-forest-700/8",
-  light: "bg-ivory-50 text-forest-800 hover:bg-white",
-  outlineLight: "border border-ivory-50/40 text-ivory-50 hover:bg-ivory-50/10",
-  danger: "bg-[#8a2a22] text-ivory-50 hover:bg-[#702019]",
+  primary: "btn-fill bg-forest-800 text-ivory-50 hover:text-charcoal-900 shadow-[0_10px_24px_-10px_rgb(15_32_25/0.65)]",
+  brass: "bg-brass-400 text-charcoal-900 hover:bg-brass-300 shadow-[0_10px_24px_-10px_rgb(176_141_87/0.45)]",
+  outline: "border border-forest-700/35 bg-ivory-50/50 text-forest-900 hover:bg-forest-800 hover:text-ivory-50 hover:border-forest-800",
+  ghost: "text-forest-800 hover:bg-forest-700/10",
+  light: "bg-ivory-50 text-forest-900 hover:bg-ivory-100",
+  outlineLight: "border border-ivory-50/35 text-ivory-50 hover:bg-ivory-50/[0.12] hover:border-brass-300",
+  danger: "bg-danger-600 text-ivory-50 hover:bg-danger-800",
 };
 
 function btnClass({ variant = "primary", size = "md", className } = {}) {
@@ -102,12 +214,40 @@ export function Btn({ to, href, variant, size, className, children, ...rest }) {
   return <button type="button" className={classes} {...rest}>{children}</button>;
 }
 
-export function SectionHeading({ title, lead, align = "start", tone = "dark", className }) {
+/**
+ * Editorial Section Heading with optional eyebrow badge and configurable heading level (`as`).
+ * Fixes invalid nested <h2><h1> markup on subpages!
+ */
+export function SectionHeading({ eyebrow, title, lead, as: Tag = "h2", id, align = "start", tone = "dark", size = "md", className }) {
   const light = tone === "light";
+  const centered = align === "center";
+  const titleSize =
+    size === "xl"
+      ? "text-3xl !leading-[1.48] sm:text-5xl sm:!leading-[1.42] lg:text-[3.25rem] lg:!leading-[1.38]"
+      : "text-3xl !leading-[1.42] sm:text-4xl sm:!leading-[1.38]";
   return (
-    <div className={cn("max-w-2xl", align === "center" && "mx-auto text-center", className)}>
-      <h2 className={cn("text-3xl font-bold leading-[1.4] sm:text-4xl", light ? "text-ivory-50" : "text-forest-900")}>{title}</h2>
-      {lead ? <p className={cn("mt-4 text-base leading-8 sm:text-lg", light ? "text-ivory-200" : "text-neutral-700")}>{lead}</p> : null}
+    <div className={cn("max-w-2xl", centered && "mx-auto text-center", className)}>
+      {eyebrow ? (
+        <p className={cn("mb-3 inline-flex items-center gap-2.5 text-xs font-bold tracking-normal", light ? "text-brass-300" : "text-brass-700")}>
+          <span aria-hidden className="size-1.5 rounded-full bg-brass-500" />
+          {eyebrow}
+        </p>
+      ) : null}
+      <Tag id={id} className={cn("font-extrabold", titleSize, light ? "text-ivory-50" : "text-forest-900")}>
+        {title}
+      </Tag>
+      {lead ? <p className={cn("mt-4 text-base leading-8 sm:text-lg", light ? "text-ivory-200/90" : "text-neutral-700")}>{lead}</p> : null}
+    </div>
+  );
+}
+
+/** Subtle brass emblem divider between major sections */
+export function BrassDivider({ className }) {
+  return (
+    <div aria-hidden className={cn("flex items-center justify-center gap-4 py-2", className)}>
+      <span className="h-px w-16 bg-gradient-to-l from-brass-500/60 to-transparent sm:w-28" />
+      <span className="size-2 rotate-45 border border-brass-500 bg-ivory-100" />
+      <span className="h-px w-16 bg-gradient-to-r from-brass-500/60 to-transparent sm:w-28" />
     </div>
   );
 }
@@ -125,7 +265,7 @@ export function Stars({ value = 5, size = 16, className }) {
 export function Spinner({ label = "در حال بارگذاری…", className }) {
   return (
     <div role="status" className={cn("flex items-center justify-center gap-3 py-12 text-neutral-700", className)}>
-      <Loader2 className="size-5 animate-spin motion-reduce:animate-none" aria-hidden />
+      <Loader2 className="size-5 animate-spin motion-reduce:animate-none text-brass-600" aria-hidden />
       <span>{label}</span>
     </div>
   );
@@ -133,9 +273,9 @@ export function Spinner({ label = "در حال بارگذاری…", className }
 
 export function EmptyState({ title, text, action, className }) {
   return (
-    <div className={cn("rounded-2xl border border-dashed border-brass-400/70 bg-ivory-50 px-6 py-12 text-center", className)}>
+    <div className={cn("rounded-3xl border border-dashed border-brass-400/70 bg-ivory-50 px-6 py-12 text-center", className)}>
       <h3 className="text-lg font-bold text-forest-900">{title}</h3>
-      {text ? <p className="mx-auto mt-2 max-w-md text-neutral-700">{text}</p> : null}
+      {text ? <p className="mx-auto mt-2 max-w-md leading-8 text-neutral-700">{text}</p> : null}
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>
   );
@@ -143,10 +283,10 @@ export function EmptyState({ title, text, action, className }) {
 
 export function ErrorState({ title = "مشکلی پیش آمد", text, onRetry, className }) {
   return (
-    <div role="alert" className={cn("rounded-2xl border border-[#8a2a22]/30 bg-[#fbeeea] px-6 py-8 text-center", className)}>
-      <AlertTriangle className="mx-auto size-6 text-[#8a2a22]" aria-hidden />
-      <h3 className="mt-3 text-lg font-bold text-[#5c1b16]">{title}</h3>
-      {text ? <p className="mx-auto mt-1 max-w-md text-[#5c1b16]">{text}</p> : null}
+    <div role="alert" className={cn("rounded-3xl border border-danger-600/30 bg-danger-50 px-6 py-8 text-center", className)}>
+      <AlertTriangle className="mx-auto size-6 text-danger-600" aria-hidden />
+      <h3 className="mt-3 text-lg font-bold text-danger-900">{title}</h3>
+      {text ? <p className="mx-auto mt-1 max-w-md text-danger-900">{text}</p> : null}
       {onRetry ? (
         <div className="mt-4 flex justify-center">
           <Btn variant="outline" size="sm" onClick={onRetry}>تلاش دوباره</Btn>
@@ -156,18 +296,24 @@ export function ErrorState({ title = "مشکلی پیش آمد", text, onRetry, 
   );
 }
 
-/** Wordmark: brass seal + calligraphic name. */
-export function Wordmark({ tone = "dark", className }) {
+/** Wordmark: bespoke double-ring brass seal + calligraphic name + Lahijan subtitle. */
+export function Wordmark({ tone = "dark", subtitle = false, className }) {
   const light = tone === "light";
   return (
     <span className={cn("inline-flex items-center gap-3", className)}>
-      <svg viewBox="0 0 40 40" width="36" height="36" aria-hidden className="shrink-0">
-        <circle cx="20" cy="20" r="18.5" fill="none" stroke="var(--color-brass-500)" strokeWidth="1.4" />
-        <path d="M13 26 L27 14 M13 14 L27 26" stroke={light ? "var(--color-ivory-100)" : "var(--color-forest-800)"} strokeWidth="2" strokeLinecap="round" />
-        <circle cx="12" cy="27.5" r="2.6" fill="none" stroke="var(--color-brass-500)" strokeWidth="1.5" />
-        <circle cx="12" cy="12.5" r="2.6" fill="none" stroke="var(--color-brass-500)" strokeWidth="1.5" />
+      <svg viewBox="0 0 44 44" width="40" height="40" aria-hidden className="shrink-0">
+        <circle cx="22" cy="22" r="20" fill={light ? "rgb(252 250 245 / 0.05)" : "rgb(29 61 48 / 0.05)"} stroke="var(--color-brass-500)" strokeWidth="1.35" />
+        <circle cx="22" cy="22" r="16.5" fill="none" stroke="var(--color-brass-400)" strokeWidth="0.7" strokeDasharray="2 2.5" opacity="0.75" />
+        <path d="M14.5 28.5 L29.5 15.5 M14.5 15.5 L29.5 28.5" stroke={light ? "var(--color-ivory-100)" : "var(--color-forest-800)"} strokeWidth="2" strokeLinecap="round" />
+        <circle cx="13.5" cy="30" r="2.6" fill="none" stroke="var(--color-brass-400)" strokeWidth="1.5" />
+        <circle cx="13.5" cy="14" r="2.6" fill="none" stroke="var(--color-brass-400)" strokeWidth="1.5" />
       </svg>
-      <span className={cn("font-[var(--font-display)] text-[1.7rem] leading-none", light ? "text-ivory-50" : "text-forest-800")}>خانه داماد</span>
+      <span className="flex flex-col">
+        <span className={cn("font-[var(--font-display)] text-[1.75rem] leading-none", light ? "text-ivory-50" : "text-forest-900")}>خانه داماد</span>
+        {subtitle ? (
+          <span className={cn("mt-1.5 text-[0.68rem] font-semibold", light ? "text-brass-300" : "text-brass-700")}>استودیو پیرایش مردانه · لاهیجان</span>
+        ) : null}
+      </span>
     </span>
   );
 }

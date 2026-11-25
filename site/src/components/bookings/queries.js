@@ -2,13 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/api/hooks';
 import { getAuthHeaders } from '@/api/auth';
 
+function readBookingSession() {
+  try {
+    return typeof localStorage !== 'undefined' ? localStorage.getItem('joorchin-booking-session') : null;
+  } catch {
+    return null;
+  }
+}
+
 export function useBookingQuery(name, load, params = {}, options = {}) {
   return useQuery({
     queryKey: [
       ...queryKeys.plugin('bookings'),
       name,
       getAuthHeaders(),
-      localStorage.getItem('joorchin-booking-session'),
+      readBookingSession(),
       params,
     ],
     queryFn: () => load(params),

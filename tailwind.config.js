@@ -1,11 +1,21 @@
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    './site/index.html',
-    './site/src/**/*.{js,jsx,ts,tsx}',
+    path.resolve(__dirname, './site/index.html'),
+    path.resolve(__dirname, './site/src/**/*.{js,jsx,ts,tsx}'),
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-body)'],
+        heading: ['var(--font-heading)'],
+        display: ['var(--font-display)'],
+      },
       colors: {
         forest: {
           50: '#eef3ef',
@@ -40,6 +50,19 @@ export default {
           800: '#232528',
           900: '#17181a',
         },
+        neutral: {
+          50: '#faf7f0',
+          100: '#f0eadc',
+          200: '#e0d8c4',
+          300: '#c9bfa5',
+          400: '#a69d86',
+          500: '#857d69',
+          600: '#6a6354',
+          700: '#4e4a40',
+          800: '#34332e',
+          900: '#232422',
+          950: '#171816',
+        },
         brand: {
           50: '#eef3ef',
           100: '#d6e3da',
@@ -53,6 +76,25 @@ export default {
           900: '#0f2019',
           950: '#09140f',
         },
+        danger: {
+          DEFAULT: '#8a2a22',
+          50: '#fbeeea',
+          100: '#f6dcd7',
+          600: '#8a2a22',
+          700: '#7a241c',
+          800: '#702019',
+          900: '#5c1b16',
+        },
+        primary: {
+          DEFAULT: '#1d3d30',
+          ink: '#0f2019',
+        },
+        'on-primary': '#fcfaf5',
+        surface: '#fcfaf5',
+        subtle: '#f0eadc',
+        border: '#ded3b9',
+        foreground: '#17181a',
+        'muted-foreground': '#5b5a52',
       },
     },
   },

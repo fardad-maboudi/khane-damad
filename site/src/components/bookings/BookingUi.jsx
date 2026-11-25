@@ -45,7 +45,7 @@ export const panelClass = 'min-w-0 rounded-2xl border border-border bg-surface p
 
 export function BookingShell({ title, description, children }) {
   return (
-    <main dir="rtl" className="mx-auto max-w-6xl space-y-8 px-4 py-8 text-foreground sm:py-12">
+    <div dir="rtl" className="mx-auto max-w-6xl space-y-8 px-4 py-8 text-foreground sm:py-12">
       <header className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-6">
         <div>
           <h1 className="text-2xl font-bold sm:text-3xl">{title}</h1>
@@ -64,7 +64,7 @@ export function BookingShell({ title, description, children }) {
         </nav>
       </header>
       {children}
-    </main>
+    </div>
   );
 }
 

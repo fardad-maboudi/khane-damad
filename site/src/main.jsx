@@ -14,6 +14,11 @@ import Contact from "@/pages/Contact.jsx";
 import Faq from "@/pages/Faq.jsx";
 import Appointments from "@/pages/Salon/Appointments.jsx";
 import Setup from "@/pages/Salon/Setup.jsx";
+import StaffLogin from "@/pages/Salon/Login.jsx";
+import BookingsBook from "@/pages/Bookings/Book.jsx";
+import BookingsEvents from "@/pages/Bookings/Events.jsx";
+import BookingsManage from "@/pages/Bookings/Manage.jsx";
+import BookingsMyBookings from "@/pages/Bookings/MyBookings.jsx";
 
 import "./index.css";
 
@@ -43,6 +48,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="/salon" element={<Navigate to="/salon/appointments" replace />} />
             <Route path="/salon/appointments" element={<Appointments />} />
             <Route path="/salon/setup" element={<Setup />} />
+            <Route path="/salon/login" element={<StaffLogin />} />
+            <Route path="/bookings" element={<Navigate to="/book" replace />} />
+            <Route path="/bookings/book" element={<BookingsBook />} />
+            <Route path="/bookings/events" element={<BookingsEvents />} />
+            <Route path="/bookings/manage" element={<BookingsManage />} />
+            <Route path="/bookings/my-bookings" element={<BookingsMyBookings />} />
+            <Route path="/admin/login" element={<Navigate to="/salon/login" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>

@@ -38,7 +38,14 @@ export function normalizeService(row) {
     image: row.image || "",
     resourceIds: (row.resourceIds || []).map(String),
     sortOrder: Number(row.sortOrder) || 0,
-    package: row.package?.enabled ? { name: row.package.name || "", sessions: Number(row.package.sessionCount) || 0, price: Number(row.package.price) || 0, validityDays: Number(row.package.validityDays) || 0 } : null,
+    package: row.package?.enabled
+      ? {
+          name: row.package.name || "",
+          sessions: Number(row.package.sessionCount) || 0,
+          price: Number(row.package.price) || 0,
+          validityDays: Number(row.package.validityDays) || 0,
+        }
+      : null,
   };
 }
 
@@ -60,10 +67,10 @@ export const isFree = (slot) => slot.available !== false && Number(slot.remainin
 /* Demo backend (only when the real one is unreachable)                */
 /* ------------------------------------------------------------------ */
 
-const DEMO_KEY = "khane-demo-bookings";
+export const DEMO_KEY = "khane-demo-bookings";
 const demoKeyFor = { s: (k) => `demo-s-${k}`, b: (k) => `demo-b-${k}` };
 
-function demoCatalog() {
+export function demoCatalog() {
   const barbers = seed.resources.map((r) => normalizeBarber({ ...r, id: demoKeyFor.b(r.key) }));
   const services = seed.services.map((s) =>
     normalizeService({
@@ -76,11 +83,19 @@ function demoCatalog() {
   return { services, barbers, demo: true };
 }
 
-function readDemoBookings() {
+export function readDemoBookings() {
   try {
     return JSON.parse(localStorage.getItem(DEMO_KEY) || "[]");
   } catch {
     return [];
+  }
+}
+
+export function writeDemoBookings(list) {
+  try {
+    localStorage.setItem(DEMO_KEY, JSON.stringify(list));
+  } catch {
+    // Ignore storage quota errors in demo mode
   }
 }
 
@@ -90,14 +105,14 @@ function demoSlotsForDay(key, services) {
   const [startH, startM] = seed.schedule.startTime.split(":").map(Number);
   const [endH, endM] = seed.schedule.endTime.split(":").map(Number);
   const dayStart = new Date(`${key}T00:00:00+03:30`).getTime();
-  const taken = readDemoBookings();
+  const taken = readDemoBookings().filter((b) => b.status !== "cancelled");
   const minStart = Date.now() + seed.settings.leadTimeMinutes * 60_000;
   const out = [];
   for (const service of services) {
     for (const barberId of service.resourceIds) {
       const open = dayStart + (startH * 60 + startM) * 60_000;
       const close = dayStart + (endH * 60 + endM) * 60_000;
-      for (let t = open; t + service.durationMinutes * 60_000 <= close; t += service.durationMinutes * 60_000) {
+      for (let t = open; t + service.durationMinutes * 60_000 <= close; t += seed.schedule.slotIntervalMinutes * 60_000) {
         if (t < minStart) continue;
         out.push({
           id: `demo|${barberId}|${service.id}|${t}`,
@@ -123,9 +138,17 @@ export async function loadCatalog() {
     const [serviceRows, barberRows] = await Promise.all([listServices(), listResources()]);
     const services = [...serviceRows].map(normalizeService).sort((a, b) => a.sortOrder - b.sortOrder);
     const barbers = [...barberRows].map(normalizeBarber).sort((a, b) => a.sortOrder - b.sortOrder);
+    // A live shop always has at least one service and one chair: an empty response
+    // means the app has not been seeded yet, so keep the showcase browsable until
+    // /salon/setup fills it. Everything else (prices, names) is taken as served.
+    if (!services.length && !barbers.length) return { ...demoCatalog(), unseeded: true };
     return { services, barbers, demo: false };
   } catch (error) {
-    if (isUnreachable(error)) return demoCatalog();
+    // Unreachable covers network/502-504. 401/403/404 mean the app keeps its
+    // catalogue away from visitors (or the route is not enabled yet), which for a
+    // public marketing page is the same practical situation: show the demo salon
+    // instead of an error page.
+    if (isUnreachable(error) || [401, 403, 404].includes(Number(error?.status ?? 0))) return demoCatalog();
     throw error;
   }
 }
@@ -199,23 +222,75 @@ export function timePeriod(iso) {
 
 export const PERIOD_LABELS = { morning: "صبح", afternoon: "بعدازظهر", evening: "عصر و شب" };
 
+/* ------------------------------------------------------------------ */
+/* Device-saved guest appointments (for quick recall on /book)        */
+/* ------------------------------------------------------------------ */
+
+const RECENT_BOOKINGS_KEY = "khane-recent-bookings";
+
+export function readRecentBookings() {
+  try {
+    return JSON.parse(localStorage.getItem(RECENT_BOOKINGS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentBooking(entry) {
+  try {
+    const prev = readRecentBookings().filter((b) => b.id !== entry.id);
+    localStorage.setItem(RECENT_BOOKINGS_KEY, JSON.stringify([entry, ...prev].slice(0, 6)));
+  } catch {
+    // Ignore blocked storage
+  }
+}
+
 /**
  * Book one slot. The server is the authority: a slot that was just taken comes
  * back as a 409 and is reported as `kind: "taken"` so the flow can refresh.
  */
-export async function createAppointment({ option, startsAt, endsAt, barber, customer }, catalog) {
+export async function createAppointment({ option, startsAt, endsAt, service, barber, customer }, catalog) {
   if (catalog.demo) {
     const stored = readDemoBookings();
     const start = new Date(startsAt).getTime();
     const end = new Date(endsAt).getTime();
-    if (stored.some((b) => b.resource === barber.id && start < b.end && end > b.start)) {
+    if (stored.some((b) => b.status !== "cancelled" && b.resource === barber.id && start < b.end && end > b.start)) {
       const error = new Error("taken");
       error.kind = "taken";
       throw error;
     }
-    const record = { id: `demo-${Date.now().toString(36)}`, resource: barber.id, start, end };
-    localStorage.setItem(DEMO_KEY, JSON.stringify([...stored, record]));
-    return { id: record.id, status: "pending", demo: true };
+    if (customer.creditId) noteCreditUsed(customer.creditId);
+    const record = {
+      id: `demo-${Date.now().toString(36)}`,
+      service: service?.id || option.slotId.split("|")[2] || "",
+      serviceTitle: service?.name || "",
+      resource: barber.id,
+      barberName: barber?.name || "",
+      start,
+      end,
+      startsAt,
+      endsAt,
+      price: service?.price || 0,
+      customerName: customer.name,
+      customerPhone: customer.phone,
+      notes: customer.note || "",
+      status: "pending",
+      paidWithCredit: Boolean(customer.creditId),
+    };
+    writeDemoBookings([...stored, record]);
+    saveRecentBooking({
+      id: record.id,
+      serviceName: service?.name || "خدمت",
+      barberName: barber?.name || "",
+      startsAt,
+      endsAt,
+      price: service?.price || 0,
+      currency: service?.currency || "IRT",
+      status: "pending",
+      paidWithCredit: Boolean(customer.creditId),
+      demo: true,
+    });
+    return { id: record.id, status: "pending", demo: true, paidWithCredit: Boolean(customer.creditId) };
   }
   try {
     const result = await bookSlot({
@@ -226,11 +301,23 @@ export async function createAppointment({ option, startsAt, endsAt, barber, cust
       creditId: customer.creditId || undefined,
     });
     if (customer.creditId) noteCreditUsed(customer.creditId);
-    return { id: idOf(result), status: result.status || "pending", demo: false, paidWithCredit: Boolean(customer.creditId) };
+    const id = idOf(result);
+    const status = result.status || "pending";
+    saveRecentBooking({
+      id,
+      serviceName: service?.name || "خدمت",
+      barberName: barber?.name || "",
+      startsAt,
+      endsAt,
+      price: service?.price || 0,
+      currency: service?.currency || "IRT",
+      status,
+      paidWithCredit: Boolean(customer.creditId),
+      demo: false,
+    });
+    return { id, status, demo: false, paidWithCredit: Boolean(customer.creditId) };
   } catch (error) {
     if (Number(error?.status) === 409) {
-      // Only a capacity or overlap refusal means "pick another time"; any other
-      // refusal (for example the open-booking limit) shows the server's own message.
       error.kind = /ظرفیت|هم‌پوشانی|گذشته/.test(String(error.message)) ? "taken" : "rejected";
     } else if (Number(error?.status) === 429) {
       error.kind = "busy";
@@ -242,10 +329,7 @@ export async function createAppointment({ option, startsAt, endsAt, barber, cust
 }
 
 /**
- * Packages and credits need the real backend; the offline demo does not sell them.
- * Guests have no account, so the purchased credit id is remembered on this device
- * (the server stays the authority: it only honours a credit that belongs to the
- * booking phone number and still has sessions left).
+ * Packages and credits: works with both live backend and standalone demo fallback.
  */
 const CREDITS_KEY = "khane-credits";
 const readCredits = () => {
@@ -259,18 +343,36 @@ const writeCredits = (list) => {
   try {
     localStorage.setItem(CREDITS_KEY, JSON.stringify(list));
   } catch {
-    // Storage blocked: the package is still valid server-side, just not offered automatically.
+    // Storage blocked
   }
 };
 
 export async function buyPackage({ service, customer }) {
   try {
     const credit = await purchaseServicePackage(service.id, { customerName: customer.name, customerPhone: customer.phone });
-    const entry = { id: idOf(credit), serviceId: service.id, phone: customer.phone, total: Number(credit.totalSessions) || service.package?.sessions || 0, remaining: Number(credit.remainingSessions) || service.package?.sessions || 0 };
+    const entry = {
+      id: idOf(credit),
+      serviceId: service.id,
+      phone: customer.phone,
+      total: Number(credit.totalSessions) || service.package?.sessions || 0,
+      remaining: Number(credit.remainingSessions) || service.package?.sessions || 0,
+    };
     writeCredits([...readCredits(), entry]);
-    return { id: entry.id, sessions: entry.total };
+    return { id: entry.id, sessions: entry.total, demo: false };
   } catch (error) {
-    if (isUnreachable(error)) error.kind = "offline";
+    if (isUnreachable(error)) {
+      const sessions = Number(service.package?.sessions) || 4;
+      const entry = {
+        id: `demo-pkg-${Date.now().toString(36)}`,
+        serviceId: service.id,
+        phone: customer.phone,
+        total: sessions,
+        remaining: sessions,
+        demo: true,
+      };
+      writeCredits([...readCredits(), entry]);
+      return { id: entry.id, sessions: entry.total, demo: true };
+    }
     throw error;
   }
 }

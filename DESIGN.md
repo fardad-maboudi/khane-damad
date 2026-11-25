@@ -31,6 +31,7 @@ Tokens live in `site/src/styles/site.css`. **Always use the tokens; never hardco
 | **Antique Brass** (`brass`) | `#b08d57` (500), `#c2a064` (400), `#e6d4ac` (200) | Luxury accent, used **sparingly**: badges, rating stars, hover fills, scrollbar thumb, focus rings |
 | **Warm Ivory** (`ivory` / `surface`) | `#fcfaf5` (50), `#f7f2e7` (100), `#ede5d1` (200), `#ded3b9` (300) | Page canvas and surfaces (a linen/papyrus feel, like fine card stock) |
 | **Charcoal / Ink** (`charcoal` / `ink`) | `#17181a` (900), `#232528` (800), `#5b5a52` (muted) | Text and contrast |
+| **Crimson / Danger** (`danger`) | `#fbeeea` (50), `#f6dcd7` (100), `#8a2a22` (600), `#7a241c` (700), `#5c1b16` (900) | Validation alerts, destructive actions, and cancellation badges |
 
 **Usage rules**
 
@@ -118,7 +119,13 @@ Tokens live in `site/src/styles/site.css`. **Always use the tokens; never hardco
 
 **Principle:** subtle, tactile, unhurried. Motion should add calm polish, never draw attention to itself.
 
-- **Easing:** `cubic-bezier(0.16, 1, 0.3, 1)` as the default.
+- **Easing tokens (CSS vars in `site.css`):** `--ease-out: cubic-bezier(0.23, 1, 0.32, 1)` for anything entering or responding to input, `--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1)` for on-screen movement (clip reveals), `--ease-soft` as the legacy default. Built-in `ease`/`ease-in` is never used on UI: it reads sluggish.
+- **Duration tokens:** `--dur-press: 140ms`, `--dur-hover: 220ms`, `--dur-reveal: 620ms`, `--dur-hero: 780ms`. Interaction feedback stays under 300ms; only hero/entrance choreography goes longer.
+- **Animate `transform`, `opacity` and `clip-path` only.** Never width/height/top/left or CSS variables on animated parents.
+- **Hover motion is gated** behind `@media (hover: hover) and (pointer: fine)` — touch devices fire `:hover` on tap and that false positive is what makes mobile sites feel sticky (`img-zoom`, `lift`, `u-link`, `nav-link`, button icon nudges).
+- **Entrances:** `.reveal-image` keeps its curtain (`.reveal-clip`) on an inner element, never on the observed one — a fully clipped box can be reported as non-intersecting and would stay invisible. `.enter` (lead, travels 18px), `.enter-fade` (decoration, fades only), `.enter-clip` (media frame opens from the bottom, photo settles 1.07 → 1). One entrance per hero, staggered only through `--i` (90ms steps); decoration never travels. Scroll reveals use `Reveal` (`variant="up" | "fade" | "image"`).
+- **Press feedback:** `.btn-press` → `scale(0.97)` at 140ms. Never animate from `scale(0)`; dialogs settle from `0.97`.
+- **Page transition:** `.page-enter` (260ms `--ease-out`). Lightbox: `.lightbox-enter` / `.lightbox-figure`.
 - **Hero entrance:** staggered `hero-rise` using the delay formula `calc(var(--i) * 90ms + 80ms)`; `hero-arch` for the clip-path photo reveal; `hero-stroke` for the SVG underline draw.
 - **Page transition:** `page-in`.
 - **Press feedback:** `.btn-press`.
