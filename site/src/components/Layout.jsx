@@ -1,13 +1,44 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { Menu, X, Phone, MapPin, Clock, CalendarPlus, ArrowLeft } from "lucide-react";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, Phone, MapPin, Clock, CalendarPlus, ArrowLeft, User, UserCheck, LogOut } from "lucide-react";
 import { Btn, Container, Wordmark, InstagramIcon, TelegramIcon, WhatsappIcon, useDialogFocusTrap } from "@/components/salon/ui.jsx";
+import { AUTH_CHANGE_EVENT, isSignedIn, signOut } from "@/api/auth.js";
 import { brand, contact, nav } from "@/content/salon.js";
 import { cn } from "@/lib/utils";
 
+function useAuthStatus() {
+  const [signedIn, setSignedIn] = useState(isSignedIn);
+  useEffect(() => {
+    const sync = () => setSignedIn(isSignedIn());
+    window.addEventListener(AUTH_CHANGE_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(AUTH_CHANGE_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+  return signedIn;
+}
+
+function ProfileStatusIcon({ signedIn, className }) {
+  const Icon = signedIn ? UserCheck : User;
+  return (
+    <span className={cn("relative inline-flex shrink-0", className)}>
+      <Icon className={cn("size-4", signedIn ? "text-forest-700" : "text-brass-600")} aria-hidden />
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -end-1 -top-1 size-2 rounded-full border border-ivory-50",
+          signedIn ? "bg-forest-500" : "bg-neutral-400",
+        )}
+      />
+    </span>
+  );
+}
+
 const HIDE_STICKY = /^\/(book|bookings|salon)(\/|$)/;
 
-function MobileMenu({ open, onClose }) {
+function MobileMenu({ open, onClose, signedIn }) {
   const panelRef = useRef(null);
   useDialogFocusTrap(open, panelRef, onClose);
   if (!open) return null;
@@ -41,6 +72,11 @@ function MobileMenu({ open, onClose }) {
           ))}
         </ul>
         <div className="mt-8 space-y-3">
+          <Btn to="/profile" variant="outlineLight" size="lg" className="w-full" onClick={onClose}>
+            <ProfileStatusIcon signedIn={signedIn} />
+            <span>مشاهده پروفایل</span>
+            <span className="text-xs text-ivory-200/80">({signedIn ? "واردشده" : "مهمان"})</span>
+          </Btn>
           <Btn to="/book" variant="brass" size="lg" className="w-full" onClick={onClose}>
             <CalendarPlus className="size-5" aria-hidden /> رزرو نوبت آنلاین
           </Btn>
@@ -56,9 +92,109 @@ function MobileMenu({ open, onClose }) {
   );
 }
 
+function ProfileMenu({ signedIn }) {
+  const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onPointerDown = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  async function handleSignOut() {
+    if (busy || !signedIn) return;
+    setBusy(true);
+    await signOut();
+    setBusy(false);
+    setOpen(false);
+    navigate("/");
+  }
+
+  if (!signedIn) {
+    return (
+      <Link
+        to="/profile"
+        aria-label="ورود به حساب کاربری"
+        title="ورود به حساب کاربری"
+        className="btn-press grid size-11 place-items-center rounded-full border border-ivory-300 bg-ivory-50/90 text-forest-900 transition-colors hover:border-brass-500"
+      >
+        <ProfileStatusIcon signedIn={false} />
+      </Link>
+    );
+  }
+
+  return (
+    <div ref={menuRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        aria-label="منوی حساب کاربری (واردشده)"
+        title="واردشده"
+        className="btn-press grid size-11 place-items-center rounded-full border border-ivory-300 bg-ivory-50/90 text-forest-900 transition-colors hover:border-brass-500"
+      >
+        <ProfileStatusIcon signedIn />
+      </button>
+
+      {open ? (
+        <div
+          role="menu"
+          aria-label="حساب کاربری"
+          className="absolute end-0 top-[calc(100%+0.5rem)] z-50 w-48 rounded-[1.25rem] border border-ivory-300 bg-ivory-50 p-2 shadow-[0_18px_40px_-18px_rgb(15_32_25/0.25)]"
+        >
+          <div className="mb-1 border-b border-ivory-200 px-3 py-2 text-xs font-semibold text-neutral-600">
+            وضعیت: <span className="text-forest-900">واردشده</span>
+          </div>
+          <Link
+            to="/profile"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+            className="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-sm font-bold text-forest-900 transition-colors hover:bg-ivory-200/70"
+          >
+            <User className="size-4 text-brass-600" aria-hidden />
+            <span>پروفایل</span>
+          </Link>
+          <button
+            type="button"
+            role="menuitem"
+            disabled={busy}
+            onClick={handleSignOut}
+            className="flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 text-start text-sm font-bold text-danger-700 transition-colors hover:bg-danger-50"
+          >
+            <LogOut className="size-4" aria-hidden />
+            <span>{busy ? "در حال خروج…" : "خروج"}</span>
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const signedIn = useAuthStatus();
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
@@ -100,15 +236,8 @@ function Header() {
             ))}
           </ul>
         </nav>
-        <div className="flex items-center gap-3">
-          <a
-            href={`tel:${contact.phone}`}
-            aria-label={`تماس تلفنی: ${contact.phoneDisplay}`}
-            className="hidden items-center gap-2 rounded-full border border-ivory-300 bg-ivory-50/80 px-3.5 py-2 text-xs font-bold text-forest-900 transition-colors hover:border-brass-500 xl:inline-flex"
-          >
-            <Phone className="size-3.5 text-brass-600" aria-hidden />
-            <span dir="ltr" className="num">{contact.phoneDisplay}</span>
-          </a>
+        <div className="flex items-center gap-2.5">
+          <ProfileMenu signedIn={signedIn} />
           {/* Shown only at lg+ so sm..lg does not duplicate StickyBook */}
           <Btn to="/book" size="sm" className="hidden lg:inline-flex lg:h-11 lg:px-6">
             <CalendarPlus className="size-4" aria-hidden /> رزرو نوبت
@@ -125,7 +254,7 @@ function Header() {
           </button>
         </div>
       </Container>
-      <MobileMenu open={open} onClose={() => setOpen(false)} />
+      <MobileMenu open={open} onClose={() => setOpen(false)} signedIn={signedIn} />
     </header>
   );
 }

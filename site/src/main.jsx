@@ -12,6 +12,7 @@ import About from "@/pages/About.jsx";
 import Reviews from "@/pages/Reviews.jsx";
 import Contact from "@/pages/Contact.jsx";
 import Faq from "@/pages/Faq.jsx";
+import Profile from "@/pages/Profile.jsx";
 import Appointments from "@/pages/Salon/Appointments.jsx";
 import Setup from "@/pages/Salon/Setup.jsx";
 import StaffLogin from "@/pages/Salon/Login.jsx";
@@ -45,6 +46,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/account" element={<Navigate to="/profile" replace />} />
             <Route path="/salon" element={<Navigate to="/salon/appointments" replace />} />
             <Route path="/salon/appointments" element={<Appointments />} />
             <Route path="/salon/setup" element={<Setup />} />
