@@ -1,5 +1,6 @@
 // Standalone stub for backoffice bookings API with interactive demo state
-import { getBackend, isUnreachable } from "@/api/joorchin.js";
+import { isUnreachable, withBookingsFallback } from "@/api/joorchin.js";
+import { addDays, todayKey } from "@/lib/fa.js";
 
 const DEMO_KEY = "khane-demo-bookings";
 const DEMO_CLIENTS_KEY = "khane-demo-clients";
@@ -206,11 +207,11 @@ const demoRescheduleBooking = async (id, { newSlotId } = {}) => {
  * reached; a 401/403 is rethrown so the page can ask for a sign-in instead of
  * showing invented appointments.
  */
-async function staffCall(run, fallback) {
-  const client = await getBackend();
-  if (!client) return fallback();
+const idOf = (v) => (v && typeof v === "object" ? String(v._id ?? v.id ?? "") : String(v ?? ""));
+
+async function staffCall(pluginRun, entitiesRun, fallback) {
   try {
-    return await run(client);
+    return await withBookingsFallback(pluginRun, entitiesRun);
   } catch (error) {
     if (isUnreachable(error)) return fallback();
     throw error;
@@ -220,24 +221,45 @@ async function staffCall(run, fallback) {
 export const getCalendar = ({ from, to, resourceId } = {}) =>
   staffCall(
     (client) => client.bookings.getCalendar({ from, to, resourceId }),
+    async (client) => {
+      const fromMs = from ? new Date(from).getTime() : -Infinity;
+      const toMs = to ? new Date(to).getTime() : Infinity;
+      const [allBookings, allSlots] = await Promise.all([
+        client.entities.booking.list("-startsAt", 500),
+        client.entities.booking_slot.list("startsAt", 500),
+      ]);
+      const inWindow = (row) => {
+        const t = new Date(row.startsAt).getTime();
+        if (t < fromMs || t >= toMs) return false;
+        if (resourceId && idOf(row.resource) !== String(resourceId)) return false;
+        return true;
+      };
+      return {
+        bookings: (Array.isArray(allBookings) ? allBookings : []).filter(inWindow),
+        slots: (Array.isArray(allSlots) ? allSlots : []).filter(inWindow),
+      };
+    },
     () => demoCalendar({ from, to, resourceId }),
   );
 
 export const confirmBooking = (id) =>
   staffCall(
     (client) => client.bookings.confirmBooking(id),
+    (client) => client.entities.booking.update(id, { status: "confirmed" }),
     () => demoConfirmBooking(id),
   );
 
 export const completeBooking = (id) =>
   staffCall(
     (client) => client.bookings.completeBooking(id),
+    (client) => client.entities.booking.update(id, { status: "completed", completedAt: new Date().toISOString() }),
     () => demoCompleteBooking(id),
   );
 
 export const noShowBooking = (id) =>
   staffCall(
     (client) => client.bookings.noShowBooking(id),
+    (client) => client.entities.booking.update(id, { status: "no_show", noShowAt: new Date().toISOString() }),
     () => demoNoShowBooking(id),
   );
 
@@ -245,6 +267,13 @@ export const cancelBooking = (id, input) => {
   const payload = typeof input === "string" ? { reason: input } : (input ?? {});
   return staffCall(
     (client) => client.bookings.cancelBooking(id, payload),
+    (client) =>
+      client.entities.booking.update(id, {
+        status: "cancelled",
+        cancelReason: payload.reason || undefined,
+        cancelledAt: new Date().toISOString(),
+        cancelledBy: "staff",
+      }),
     () => demoCancelBooking(id),
   );
 };
@@ -252,6 +281,16 @@ export const cancelBooking = (id, input) => {
 export const rescheduleBooking = (id, input = {}) =>
   staffCall(
     (client) => client.bookings.rescheduleBooking(id, input),
+    async (client) => {
+      const slot = await client.entities.booking_slot.get(input.newSlotId);
+      return client.entities.booking.update(id, {
+        slotId: input.newSlotId,
+        startsAt: slot.startsAt,
+        endsAt: slot.endsAt,
+        resource: idOf(slot.resource) || undefined,
+        status: "confirmed",
+      });
+    },
     () => demoRescheduleBooking(id, input),
   );
 
@@ -264,17 +303,89 @@ export const rescheduleBooking = (id, input = {}) =>
 export const createService = (body) =>
   staffCall(
     (client) => client.backoffice.plugin("bookings").action("services", { method: "POST", body }),
+    (client) => client.entities.booking_service.create(body),
     () => ({ ok: true }),
   );
 
 export const updateService = (id, body) =>
   staffCall(
     (client) => client.backoffice.plugin("bookings").action(`services/${encodeURIComponent(id)}`, { method: "PUT", body }),
+    (client) => client.entities.booking_service.update(id, body),
     () => ({ ok: true }),
   );
+
+async function generateEntitySlots(client, { daysAhead = 21, resourceId } = {}) {
+  const [schedules, services, timeoffs, existingSlots] = await Promise.all([
+    client.entities.booking_schedule.filter({ active: true }, undefined, 500),
+    client.entities.booking_service.filter({ active: true }, undefined, 200),
+    client.entities.booking_timeoff.list(undefined, 500),
+    client.entities.booking_slot.list(undefined, 2000),
+  ]);
+  const serviceMap = new Map((services || []).map((s) => [idOf(s), s]));
+  const existingKeys = new Set(
+    (existingSlots || []).map((s) => s.generationKey || `${idOf(s.resource)}|${idOf(s.service)}|${new Date(s.startsAt).toISOString()}`),
+  );
+  const startDay = todayKey();
+  const toCreate = [];
+
+  for (let offset = 0; offset < daysAhead; offset++) {
+    const day = addDays(startDay, offset);
+    const weekday = new Date(`${day}T12:00:00+03:30`).getUTCDay();
+    const dayStartMs = new Date(`${day}T00:00:00+03:30`).getTime();
+
+    for (const sched of schedules || []) {
+      const resId = idOf(sched.resource);
+      const srvId = idOf(sched.service);
+      if (resourceId && resId !== String(resourceId)) continue;
+      if (Number(sched.weekday) !== weekday) continue;
+      const service = serviceMap.get(srvId);
+      if (!service) continue;
+
+      const [sh, sm] = String(sched.startTime || "10:00").split(":").map(Number);
+      const [eh, em] = String(sched.endTime || "21:00").split(":").map(Number);
+      const durationMs = (Number(service.durationMinutes) || 30) * 60_000;
+      const stepMs = (Number(sched.slotIntervalMinutes) || 30) * 60_000;
+      const openMs = dayStartMs + (sh * 60 + sm) * 60_000;
+      const closeMs = dayStartMs + (eh * 60 + em) * 60_000;
+
+      for (let t = openMs; t + durationMs <= closeMs; t += stepMs) {
+        const end = t + durationMs;
+        const blocked = (timeoffs || []).some((off) => {
+          const offRes = idOf(off.resource);
+          if (offRes && offRes !== resId) return false;
+          const os = new Date(off.startsAt).getTime();
+          const oe = new Date(off.endsAt).getTime();
+          return t < oe && end > os;
+        });
+        if (blocked) continue;
+        const startsAt = new Date(t).toISOString();
+        const generationKey = `${resId}|${srvId}|${startsAt}`;
+        if (existingKeys.has(generationKey)) continue;
+        existingKeys.add(generationKey);
+        toCreate.push({
+          startsAt,
+          endsAt: new Date(end).toISOString(),
+          service: srvId,
+          resource: resId,
+          capacity: Number(service.capacity) || 1,
+          capacityTotal: Number(service.capacity) || 1,
+          available: true,
+          price: Number(service.price) || 0,
+          generationKey,
+        });
+      }
+    }
+  }
+
+  for (let i = 0; i < toCreate.length; i += 100) {
+    await client.entities.booking_slot.bulkCreate(toCreate.slice(i, i + 100));
+  }
+  return { ok: true, count: toCreate.length };
+}
 
 export const generateSlots = (input) =>
   staffCall(
     (client) => client.bookings.generateSlots(input),
+    (client) => generateEntitySlots(client, input),
     () => ({ ok: true, count: 0 }),
   );

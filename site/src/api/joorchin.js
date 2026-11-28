@@ -87,6 +87,32 @@ export function isUnreachable(error) {
   return status === 0 || status === 502 || status === 503 || status === 504;
 }
 
+let bookingsPluginMissing = false;
+
+/**
+ * Run a `bookings` plugin call, falling back to `client.entities` when the
+ * `bookings` plugin is not installed on the target Joorchin app.
+ */
+export async function withBookingsFallback(pluginFn, entitiesFn) {
+  const client = await getBackend();
+  if (!client) throw Object.assign(new Error("Backend is not configured"), { status: 0 });
+  if (bookingsPluginMissing) return entitiesFn(client);
+  try {
+    return await pluginFn(client);
+  } catch (error) {
+    const status = statusOf(error);
+    const msg = String(error?.message ?? "");
+    const pluginUnavailable =
+      (status === 403 && /not installed|نصب نشده/i.test(msg)) ||
+      status === 404;
+    if (pluginUnavailable) {
+      bookingsPluginMissing = true;
+      return entitiesFn(client);
+    }
+    throw error;
+  }
+}
+
 /** A signed-in session exists (access token persisted by the SDK). */
 export function hasSession() {
   try {
