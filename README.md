@@ -15,6 +15,31 @@ Persian men's grooming studio in Lahijan on `be/vps/generated-site` with the `bo
 | `tests/` | `bun test ./gallery/khane-damad/tests/khane-damad.test.ts` |
 | `evidence/` | Rendered RTL screenshots, desktop 1440 and mobile 390. |
 
+## Backend (Joorchin)
+
+The visitor and staff surfaces talk to a Joorchin app through `@joorchin/client-sdk`
+(`site/src/api/joorchin.js` owns the single client).
+
+1. **`npm install`.** The SDK is a normal dependency; a `node_modules` tree from
+   before it was added is what produces
+   `Failed to resolve import "@joorchin/client-sdk"`. Check with
+   `npm ls @joorchin/client-sdk` (expect `0.3.2`).
+2. **Configure the app.** Copy `.env.example` to `.env.local` and set
+   `VITE_JOORCHIN_APP_ID`. Leave `VITE_JOORCHIN_SERVER_URL` empty for
+   `https://api.joorchin.ai`, or set `https://api.joorchin.site` when the app
+   lives on staging — one line per key, because the **last** duplicate wins.
+   `VITE_API_MODE=demo` keeps the bundled data even with an app id set. Without an
+   app id the site runs entirely on its demo pack and never calls the network.
+   Vite's root is `./site`, so `vite.config.js` sets `envDir` to the repo root —
+   keep env files next to `package.json`, and restart the dev server after edits.
+   The staff sign-in card prints the effective host and app id.
+3. **Seed an empty app from the browser**: sign in at `/salon/login` (staff phone
+   OTP, or password if one is set), then press the seed button on `/salon/setup`.
+   It writes settings, barbers, services, schedules, time off and generates 21 days
+   of slots, and is idempotent on a second run.
+4. **Deployments** need the same `VITE_JOORCHIN_APP_ID` in the host environment;
+   `.env.local` is git-ignored.
+
 ## Rebuild locally
 
 1. Create an app, install `bookings`, `auth`, `notifications` (`POST /apps/:id/plugins`).

@@ -16,7 +16,23 @@ const env = import.meta.env ?? {};
 export const APP_ID = String(env.VITE_JOORCHIN_APP_ID ?? "").trim();
 /** Empty means the SDK default, https://api.joorchin.ai. */
 export const SERVER_URL = String(env.VITE_JOORCHIN_SERVER_URL ?? "").trim() || undefined;
-export const hasBackend = Boolean(APP_ID);
+/** Shown in the staff sign-in card, so a wrong host is visible instead of silent. */
+export const API_HOST = SERVER_URL ?? "https://api.joorchin.ai";
+/**
+ * `VITE_API_MODE=demo` keeps the bundled demo data even when an app id is set
+ * (handy for design work); anything else means live. It can only ever take the
+ * backend away, never invent one.
+ */
+export const API_MODE = String(env.VITE_API_MODE ?? "live").trim().toLowerCase();
+export const hasBackend = Boolean(APP_ID) && API_MODE !== "demo";
+
+if (env.DEV && !hasBackend) {
+  console.info(
+    API_MODE === "demo"
+      ? "[joorchin] VITE_API_MODE=demo — serving bundled demo data."
+      : "[joorchin] no VITE_JOORCHIN_APP_ID in .env.local — serving bundled demo data.",
+  );
+}
 
 /** Guest booking session: the server-issued id that owns anonymous bookings. */
 const BOOKING_SESSION_KEY = "joorchin-booking-session";
